@@ -1,4 +1,15 @@
 import { ModeToggle } from "@/components/theme-toggle"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,22 +19,26 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { listComponents, menuItems } from "@/constants"
+import { listComponents } from "@/constants"
 import { cn } from "@/lib/utils"
+import { SignOutButton } from "@clerk/nextjs"
+import { auth, currentUser } from "@clerk/nextjs/server"
+import { LogOut, Settings, UserRound } from "lucide-react"
 import Link from "next/link"
-// import { usePathname } from "next/navigation"
 import React from "react"
 // import { MobileMenu } from "./mobile-menu"
 
-export const SiteHeader = () => {
+export const SiteHeader = async () => {
   // const pathname = usePathname()
+  const { userId } = await auth()
+  const user = await currentUser()
 
   return (
     <header className="sticky top-0 z-20 mx-auto flex max-w-6xl justify-between p-4 backdrop-blur">
       {/* Desktop Navigation */}
       <Link
         href={"/"}
-        className="text-accent-foreground -mt-1 text-3xl font-bold"
+        className="-mt-1 text-3xl font-bold text-accent-foreground"
       >
         mc.ca
       </Link>
@@ -50,28 +65,101 @@ export const SiteHeader = () => {
               </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
-          {/* <NavigationMenuIndicator  /> */}
 
-          {menuItems.map((item) => {
-            // const isActive = pathname === item.href
+          <NavigationMenuItem>
+            <Link href={"/post"} legacyBehavior passHref>
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "bg-transparent text-base",
+                )}
+              >
+                Annoncez avec nous
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
 
-            return (
-              <NavigationMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
+          <NavigationMenuItem>
+            <Link href={"/contact-us"} legacyBehavior passHref>
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "bg-transparent text-base",
+                )}
+              >
+                Nous joindre
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+
+          <>
+            {!userId && (
+              <NavigationMenuItem>
+                <Link href={"/auth/sign-in"} legacyBehavior passHref>
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
                       "bg-transparent text-base",
-                      // { "text-accent-foreground": isActive },
                     )}
                   >
-                    {item.label}
+                    Connexion
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-            )
-          })}
+            )}
+          </>
         </NavigationMenuList>
+
+        <>
+          {userId && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="mx-2 cursor-pointer">
+                  <AvatarImage src={user?.imageUrl} />
+                  <AvatarFallback>XO</AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-52"
+                align="end"
+                alignOffset={-4}
+              >
+                <DropdownMenuLabel>
+                  {user?.firstName} {user?.lastName}
+                </DropdownMenuLabel>
+                <DropdownMenuLabel className="text-muted-foreground">
+                  {user?.emailAddresses[0].emailAddress}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Mon profil
+                    <DropdownMenuShortcut>
+                      <UserRound size={20} />
+                    </DropdownMenuShortcut>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Paramètres
+                    <DropdownMenuShortcut>
+                      <Settings size={20} />
+                    </DropdownMenuShortcut>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+
+                <SignOutButton>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Se déconnecter
+                    <DropdownMenuShortcut>
+                      <LogOut size={20} />
+                    </DropdownMenuShortcut>
+                  </DropdownMenuItem>
+                </SignOutButton>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </>
+
         <ModeToggle />
       </NavigationMenu>
 
@@ -108,13 +196,13 @@ const ListItem = React.forwardRef<
           ref={ref}
           href={href as string}
           className={cn(
-            "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className,
           )}
           {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
         </Link>
