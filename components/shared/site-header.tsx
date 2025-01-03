@@ -132,18 +132,23 @@ export const SiteHeader = async () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Mon profil
-                    <DropdownMenuShortcut>
-                      <UserRound size={20} />
-                    </DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Paramètres
-                    <DropdownMenuShortcut>
-                      <Settings size={20} />
-                    </DropdownMenuShortcut>
-                  </DropdownMenuItem>
+                  <Link href={"/my-profile"}>
+                    <DropdownMenuItem className="cursor-pointer">
+                      Mon profil
+                      <DropdownMenuShortcut>
+                        <UserRound size={20} />
+                      </DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                  </Link>
+
+                  <Link href={"/my-profile/security"}>
+                    <DropdownMenuItem className="cursor-pointer">
+                      Paramètres
+                      <DropdownMenuShortcut>
+                        <Settings size={20} />
+                      </DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                  </Link>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
 
