@@ -21,7 +21,7 @@ export const SiteHeader = async () => {
   const user = await currentUser()
 
   return (
-    <header className="sticky top-0 z-20 mx-auto flex max-w-6xl justify-between p-4 backdrop-blur">
+    <header className="sticky top-0 z-20 flex justify-between pt-4 backdrop-blur">
       <Link
         href={"/"}
         className="-mt-1 text-3xl font-bold text-accent-foreground"

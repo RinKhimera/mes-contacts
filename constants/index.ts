@@ -61,3 +61,19 @@ export const listComponents: {
       "Accéder à la liste détaillée et complète des éléments ou options disponibles.",
   },
 ]
+
+export const provinces = [
+  { label: "Alberta", value: "AB" },
+  { label: "Colombie-Britannique", value: "BC" },
+  { label: "Manitoba", value: "MB" },
+  { label: "Nouveau-Brunswick", value: "NB" },
+  { label: "Terre-Neuve-et-Labrador", value: "NL" },
+  { label: "Nouvelle-Écosse", value: "NS" },
+  { label: "Ontario", value: "ON" },
+  { label: "Île-du-Prince-Édouard", value: "PE" },
+  { label: "Québec", value: "QC" },
+  { label: "Saskatchewan", value: "SK" },
+  { label: "Territoires du Nord-Ouest", value: "NT" },
+  { label: "Nunavut", value: "NU" },
+  { label: "Yukon", value: "YT" },
+]

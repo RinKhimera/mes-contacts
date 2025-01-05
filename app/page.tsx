@@ -1,16 +1,11 @@
 import { SiteHeader } from "@/components/shared/site-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { auth, currentUser } from "@clerk/nextjs/server"
 import { Search } from "lucide-react"
 
 export default async function Home() {
-  const { userId } = await auth()
-  const user = await currentUser()
-  console.log(userId, user)
-
   return (
-    <section>
+    <div className="mx-auto max-w-6xl p-4">
       <SiteHeader />
 
       <div className="mx-auto mt-20 max-w-xl text-center text-3xl font-bold">
@@ -34,6 +29,6 @@ export default async function Home() {
           <Search size={28} strokeWidth={4} />
         </Button>
       </form>
-    </section>
+    </div>
   )
 }
