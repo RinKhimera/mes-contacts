@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/shared/theme-provider"
 import { frFR } from "@clerk/localizations"
 import { ClerkProvider } from "@clerk/nextjs"
 import { dark } from "@clerk/themes"

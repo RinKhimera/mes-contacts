@@ -1,93 +1,92 @@
-// import { SignIn } from "@clerk/nextjs"
-
-// export default function Page() {
-//   return <SignIn />
-// }
-
-"use client"
-
-"use client"
-
-import * as Clerk from "@clerk/elements/common"
-import * as SignIn from "@clerk/elements/sign-in"
+import backgroundSignin from "@/public/images/background-signin.jpg"
+import { SignIn } from "@clerk/nextjs"
+import { Loader } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
 
 export default function SignInPage() {
   return (
-    <div className="grid w-full flex-grow items-center bg-zinc-100 px-4 sm:justify-center">
-      <SignIn.Root>
-        <SignIn.Step
-          name="start"
-          className="w-full space-y-6 rounded-2xl bg-white px-4 py-10 shadow-md ring-1 ring-black/5 sm:w-96 sm:px-8"
-        >
-          <header className="text-center">
+    <>
+      <div className="container relative grid h-screen p-5 lg:max-w-none lg:grid-cols-2">
+        {/* Côté gauche desktop */}
+        <div className="relative hidden h-full flex-col p-10 text-white lg:flex">
+          {/* <div className="absolute inset-0 bg-zinc-900" /> */}
+          <Image
+            src={backgroundSignin}
+            alt="backgroundSignin image"
+            placeholder="blur"
+            style={{ objectFit: "cover" }}
+            quality={100}
+            className="absolute inset-0 rounded-xl bg-zinc-900"
+            priority
+            fill
+          />
+
+          <Link
+            className="relative z-20 flex items-center text-3xl font-semibold"
+            href="/"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
               fill="none"
-              viewBox="0 0 40 40"
-              className="mx-auto size-10 text-zinc-950"
-              aria-hidden
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-2 mt-2 h-6 w-6"
             >
-              <mask
-                id="a"
-                width="40"
-                height="40"
-                x="0"
-                y="0"
-                maskUnits="userSpaceOnUse"
-              >
-                <circle cx="20" cy="20" r="20" fill="#D9D9D9" />
-              </mask>
-              <g fill="currentColor" mask="url(#a)">
-                <path d="M43.5 3a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46V2ZM43.5 8a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46V7ZM43.5 13a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 18a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 23a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 28a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 33a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 38a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1Z" />
-                <path d="M27 3.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM25 8.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM23 13.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM21.5 18.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM20.5 23.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM22.5 28.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM25 33.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM27 38.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2Z" />
-              </g>
+              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
             </svg>
-            <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950">
-              Sign in to Clover
-            </h1>
-          </header>
-          <Clerk.GlobalError className="block text-sm text-red-400" />
-          <div className="space-y-4">
-            <Clerk.Field name="identifier" className="space-y-2">
-              <Clerk.Label className="text-sm font-medium text-zinc-950">
-                Username
-              </Clerk.Label>
-              <Clerk.Input
-                type="text"
-                required
-                className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
-              />
-              <Clerk.FieldError className="block text-sm text-red-400" />
-            </Clerk.Field>
-            <Clerk.Field name="password" className="space-y-2">
-              <Clerk.Label className="text-sm font-medium text-zinc-950">
-                Password
-              </Clerk.Label>
-              <Clerk.Input
-                type="password"
-                required
-                className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
-              />
-              <Clerk.FieldError className="block text-sm text-red-400" />
-            </Clerk.Field>
+            mc.ca
+          </Link>
+
+          <div className="relative z-20 mt-auto">
+            <blockquote className="space-y-2">
+              <p className="text-lg">
+                &ldquo;Des informations toujours claires, des contacts fiables
+                et une interface agréable. C’est une ressource indispensable
+                pour moi.&rdquo;
+              </p>
+              <footer className="text-sm">Vanessa Elonguele</footer>
+            </blockquote>
           </div>
-          <SignIn.Action
-            submit
-            className="w-full rounded-md bg-zinc-950 px-3.5 py-1.5 text-center text-sm font-medium text-white shadow outline-none ring-1 ring-inset ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-zinc-950 active:text-white/70"
-          >
-            Sign In
-          </SignIn.Action>
-          <p className="text-center text-sm text-zinc-500">
-            No account?{" "}
-            <Clerk.Link
-              navigate="sign-up"
-              className="font-medium text-zinc-950 decoration-zinc-950/20 underline-offset-4 outline-none hover:text-zinc-700 hover:underline focus-visible:underline"
-            >
-              Create an account
-            </Clerk.Link>
-          </p>
-        </SignIn.Step>
-      </SignIn.Root>
-    </div>
+        </div>
+
+        {/* Côté droit desktop ou version mobile */}
+        <div className="lg:p-0">
+          <div className="flex h-full w-full flex-col items-center justify-center pb-4">
+            <div className="relative z-20 flex items-center text-3xl font-semibold lg:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2 mt-2 h-6 w-6"
+              >
+                <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+              </svg>
+              mc.ca
+            </div>
+
+            <h1 className="mb-5 max-w-md text-center text-3xl font-medium tracking-tight max-lg:mt-4 lg:text-4xl">
+              <span className="text-primary">Connectez-vous</span> pour gérer
+              vos annonces et consulter des informations précises en un clic.
+            </h1>
+
+            {/* Spinner en dessous du formulaire de Clerk car ce dernier prend du temps à charger */}
+            <div className="relative flex min-h-[535px] w-11/12 justify-center">
+              <div className="absolute inset-0 flex items-center justify-center text-primary">
+                <Loader size={52} className="animate-spin" />
+              </div>
+              <SignIn />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
