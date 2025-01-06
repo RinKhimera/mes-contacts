@@ -22,9 +22,25 @@ import { provinces } from "@/constants"
 import { citiesByProvinces } from "@/hooks"
 import { postSchema } from "@/schemas/post"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
+// import { useEffect } from "react"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { Check, ChevronsUpDown } from "lucide-react"
 import { useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
+import { Textarea } from "../ui/textarea"
 
 export const PostForm = () => {
   const form = useForm<z.infer<typeof postSchema>>({
@@ -32,12 +48,12 @@ export const PostForm = () => {
     defaultValues: {
       name: "",
       phone: "",
-      // email: "",
-      // website: "",
+      email: "",
+      website: "",
       description: "",
       address: "",
-      // city: "",
-      // province: "",
+      city: "",
+      province: "",
       postalCode: "",
       category: "",
       services: [],
@@ -60,16 +76,17 @@ export const PostForm = () => {
 
   console.log("City value:", cityValue)
 
-  useEffect(() => {
-    // Deselect the city value when the province changes
-    if (form.getValues("city")) {
-      form.setValue("city", "") // Clear the city selection
-    }
-  }, [provinceValue, form])
+  // useEffect(() => {
+  //   // Reset the city value when the province changes
+  //   form.setValue("city", "")
+  // }, [provinceValue, form])
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="mb-4 max-w-2xl space-y-4"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -144,8 +161,9 @@ export const PostForm = () => {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input
+                <Textarea
                   placeholder="Description de votre entreprise"
+                  className="min-h-[100px] resize-none"
                   {...field}
                 />
               </FormControl>
@@ -178,7 +196,13 @@ export const PostForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Province</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value) // Met à jour la valeur de la province
+                  form.setValue("city", "") // Réinitialise la ville
+                }}
+                defaultValue={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez votre province" />
@@ -202,11 +226,11 @@ export const PostForm = () => {
           control={form.control}
           name="city"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex w-full flex-col">
               <FormLabel>Ville</FormLabel>
-              <Select
+              {/* <Select
                 onValueChange={field.onChange}
-                value={field.value || undefined} // Ensure the field value is reset
+                defaultValue={field.value}
                 disabled={!provinceValue}
               >
                 <FormControl>
@@ -221,7 +245,60 @@ export const PostForm = () => {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </Select> */}
+              <Popover>
+                <PopoverTrigger asChild disabled={!provinceValue}>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between pl-3 pr-2 font-normal",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      {field.value
+                        ? citiesByProvinces(provinceValue).find(
+                            (city) => city.name === field.value,
+                          )?.name
+                        : "Sélectionnez votre ville"}
+                      <ChevronsUpDown className="opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[672px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Rechercher une ville..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <CommandEmpty>Aucune entrée trouvée.</CommandEmpty>
+                      <CommandGroup>
+                        {citiesByProvinces(provinceValue).map((city, i) => (
+                          <CommandItem
+                            value={city.name}
+                            key={i}
+                            onSelect={() => {
+                              form.setValue("city", city.name)
+                            }}
+                          >
+                            {city.name}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                city.name === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormDescription>Votre ville publique.</FormDescription>
               <FormMessage />
             </FormItem>
