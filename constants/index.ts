@@ -77,3 +77,13 @@ export const provinces = [
   { label: "Nunavut", value: "NU" },
   { label: "Yukon", value: "YT" },
 ]
+
+export const categoriesServices = [
+  "Plombier",
+  "Electricien",
+  "Homme à tout faire",
+  "Courtier Hypothécaire",
+  "Courtier Immobilier",
+  "Assurance",
+  "Association Communautaire",
+]

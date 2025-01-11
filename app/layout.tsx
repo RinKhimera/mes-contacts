@@ -1,5 +1,6 @@
 import "@/app/globals.css"
 import { ThemeProvider } from "@/components/shared/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { frFR } from "@clerk/localizations"
 import { ClerkProvider } from "@clerk/nextjs"
 import { dark } from "@clerk/themes"
@@ -45,6 +46,7 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
+          <Toaster richColors />
         </body>
       </html>
     </ClerkProvider>

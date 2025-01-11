@@ -11,17 +11,19 @@ import {
 } from "@/components/ui/navigation-menu"
 import { listComponents } from "@/constants"
 import { cn } from "@/lib/utils"
-import { auth, currentUser } from "@clerk/nextjs/server"
+import type { User } from "@clerk/backend"
 import Link from "next/link"
 import React from "react"
 import { MobileMenu } from "./mobile-menu"
 
-export const SiteHeader = async () => {
-  const { userId } = await auth()
-  const user = await currentUser()
+type SiteHeaderProps = {
+  user: User | null
+  userId: string | null
+}
 
+export const SiteHeader = ({ user, userId }: SiteHeaderProps) => {
   return (
-    <header className="sticky top-0 z-20 flex justify-between pt-4 backdrop-blur">
+    <header className="sticky top-0 z-20 flex justify-between bg-background pt-4">
       <Link
         href={"/"}
         className="-mt-1 text-3xl font-bold text-accent-foreground"

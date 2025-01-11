@@ -54,7 +54,7 @@ export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
               </DropdownMenuPortal>
             </DropdownMenuSub>
 
-            <Link href={"/my-profile/security"}>
+            <Link href={"/post"}>
               <DropdownMenuItem className="cursor-pointer">
                 Annoncez avec nous
                 <DropdownMenuShortcut>
@@ -63,7 +63,7 @@ export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
               </DropdownMenuItem>
             </Link>
 
-            <Link href={"/my-profile/security"}>
+            <Link href={"/"}>
               <DropdownMenuItem className="cursor-pointer">
                 Nous joindre
                 <DropdownMenuShortcut>

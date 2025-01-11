@@ -2,6 +2,14 @@
 
 import { Button } from "@/components/ui/button"
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
   Form,
   FormControl,
   FormDescription,
@@ -12,74 +20,75 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { provinces } from "@/constants"
+import { Textarea } from "@/components/ui/textarea"
+import { categoriesServices, provinces } from "@/constants"
 import { citiesByProvinces } from "@/hooks"
-import { postSchema } from "@/schemas/post"
-import { zodResolver } from "@hookform/resolvers/zod"
-// import { useEffect } from "react"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { postSchema } from "@/schemas/post"
+import { createPost } from "@/server/actions/post"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
-import { Textarea } from "../ui/textarea"
 
-export const PostForm = () => {
+export const PostForm = ({ userId }: { userId: string | null }) => {
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       name: "",
       phone: "",
       email: "",
-      website: "",
+      // website: "",
       description: "",
       address: "",
+      // province: "",
       city: "",
-      province: "",
       postalCode: "",
       category: "",
-      services: [],
+      services: "",
     },
   })
 
-  const onSubmit = (data: z.infer<typeof postSchema>) => {
-    console.log(data)
+  const onSubmit = async (data: z.infer<typeof postSchema>) => {
+    startTransition(async () => {
+      try {
+        if (!userId) throw new Error("You must be logged in to create a post")
+
+        await createPost({ data, userId })
+        console.log(data, userId)
+        router.push("/")
+        // toast.success("La publication a été ajoutée à vos collections")
+      } catch (error) {
+        console.error(error)
+        toast.error("Une erreur s'est produite !", {
+          description:
+            "Veuillez vérifier votre connexion internet et réessayer",
+        })
+      }
+    })
   }
 
   const provinceValue = useWatch({
     control: form.control,
     name: "province",
   })
-
-  const cityValue = useWatch({
-    control: form.control,
-    name: "city",
-  })
-
-  console.log("City value:", cityValue)
-
-  // useEffect(() => {
-  //   // Reset the city value when the province changes
-  //   form.setValue("city", "")
-  // }, [provinceValue, form])
 
   return (
     <Form {...form}>
@@ -134,21 +143,6 @@ export const PostForm = () => {
                 <Input placeholder="example@xyz.com" {...field} />
               </FormControl>
               <FormDescription>Votre courriel public.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="website"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Site web</FormLabel>
-              <FormControl>
-                <Input placeholder="https://www.example.com" {...field} />
-              </FormControl>
-              <FormDescription>Votre site web public.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -228,24 +222,6 @@ export const PostForm = () => {
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <FormLabel>Ville</FormLabel>
-              {/* <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                disabled={!provinceValue}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez votre ville" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {citiesByProvinces(provinceValue).map((city, index) => (
-                    <SelectItem key={index} value={city.name}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select> */}
               <Popover>
                 <PopoverTrigger asChild disabled={!provinceValue}>
                   <FormControl>
@@ -273,7 +249,7 @@ export const PostForm = () => {
                       className="h-9"
                     />
                     <CommandList>
-                      <CommandEmpty>Aucune entrée trouvée.</CommandEmpty>
+                      <CommandEmpty>Aucune entrée trouvée !</CommandEmpty>
                       <CommandGroup>
                         {citiesByProvinces(provinceValue).map((city, i) => (
                           <CommandItem
@@ -326,9 +302,25 @@ export const PostForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Catégorie</FormLabel>
-              <FormControl>
-                <Input placeholder="Restaurant" {...field} />
-              </FormControl>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value)
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez la catégorie de votre entreprise" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categoriesServices.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormDescription>
                 La catégorie de votre entreprise.
               </FormDescription>
@@ -357,7 +349,9 @@ export const PostForm = () => {
           )}
         />
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? <LoaderCircle className="animate-spin" /> : "Soumettre"}
+        </Button>
       </form>
     </Form>
   )
