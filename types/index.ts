@@ -8,6 +8,7 @@ export type CitiesProps = {
 }[]
 
 export type PostCardProps = {
+  id: string
   name: string
   address: string
   city: string

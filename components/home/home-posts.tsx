@@ -12,6 +12,7 @@ export const HomePosts = async () => {
         {posts.map((post) => (
           <PostCard
             key={post.id}
+            id={post.id}
             name={post.name}
             address={post.address}
             description={post.description}
