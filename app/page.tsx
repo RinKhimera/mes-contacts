@@ -1,3 +1,4 @@
+import { HomePosts } from "@/components/home/home-posts"
 import { SiteHeader } from "@/components/shared/site-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +17,7 @@ export default async function Home() {
         Trouvez des services et des entreprises au Québec et le reste du Canada
       </div>
 
-      <form className="mx-auto mt-8 flex w-full max-w-xl flex-col gap-0 max-sm:gap-2 sm:flex-row">
+      <form className="mx-auto my-8 flex w-full max-w-xl flex-col gap-0 max-sm:gap-2 sm:flex-row">
         <div className="flex flex-grow flex-col gap-2 sm:flex-row">
           <Input
             type="text"
@@ -37,6 +38,8 @@ export default async function Home() {
           <Search size={28} strokeWidth={4} />
         </Button>
       </form>
+
+      <HomePosts />
     </div>
   )
 }
