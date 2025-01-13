@@ -1,18 +1,11 @@
 import { HomePosts } from "@/components/home/home-posts"
-import { SiteHeader } from "@/components/shared/site-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { auth, currentUser } from "@clerk/nextjs/server"
 import { Search } from "lucide-react"
 
-export default async function Home() {
-  const { userId } = await auth()
-  const user = await currentUser()
-
+export default function Home() {
   return (
     <div className="mx-auto max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
-      <SiteHeader user={user} userId={userId} />
-
       <div className="mx-auto mt-20 max-w-xl text-center text-2xl font-bold lg:text-3xl">
         Trouvez des services et des entreprises au Québec et le reste du Canada
       </div>

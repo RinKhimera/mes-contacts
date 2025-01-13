@@ -82,6 +82,7 @@ export const categoriesServices = [
   "Plombier",
   "Electricien",
   "Homme à tout faire",
+  "REEE",
   "Courtier Hypothécaire",
   "Courtier Immobilier",
   "Assurance",
