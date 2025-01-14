@@ -19,13 +19,13 @@ model Post {
   name        String
   phone       String
   email       String
-  description String
+  description String?
   address     String
   province    String
   city        String
   postalCode  String
   category    String
-  services    String
+  services    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

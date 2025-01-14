@@ -56,23 +56,23 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
       phone: "",
       email: "",
       // website: "",
-      description: "",
+      description: undefined,
       address: "",
       // province: "",
       city: "",
       postalCode: "",
       category: "",
-      services: "",
+      services: undefined,
     },
   })
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     startTransition(async () => {
       try {
+        console.log(data, userId)
         if (!userId) throw new Error("You must be logged in to create a post")
 
         await createPost({ data, userId })
-        console.log(data, userId)
         router.push("/")
         // toast.success("La publication a été ajoutée à vos collections")
       } catch (error) {
@@ -101,7 +101,7 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel>Nom de l&apos;entreprise</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Clinique | Restaurant | Garage John Doe"

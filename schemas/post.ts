@@ -20,7 +20,7 @@ export const postSchema = z.object({
     1,
     50,
     "Cette entrée est requise.",
-    "Le nom d'affichage doit comporter au plus 50 caractères.",
+    "Le nom de votre entreprise doit comporter au plus 50 caractères.",
   ).transform(transformCapitalize),
   phone: z
     .string()
@@ -41,12 +41,19 @@ export const postSchema = z.object({
     .string()
     .trim()
     .email({ message: "Veuillez saisir une adresse courriel valide" }),
-  description: requiredString(
-    1,
-    500,
-    "Cette entrée est requise.",
-    "La description doit comporter au plus 500 caractères.",
-  ).transform(transformCapitalize),
+  description:
+    // requiredString(
+    //   1,
+    //   500,
+    //   "Cette entrée est requise.",
+    //   "La description doit comporter au plus 500 caractères.",
+    // ).transform(transformCapitalize),
+    z
+      .string()
+      .max(500, {
+        message: "La description doit comporter au plus 500 caractères.",
+      })
+      .optional(),
   address: requiredString(
     1,
     100,
@@ -79,10 +86,10 @@ export const postSchema = z.object({
     "Cette entrée est requise.",
     "La catégorie doit comporter au plus 50 caractères.",
   ),
-  services: requiredString(
-    1,
-    500,
-    "Cette entrée est requise.",
-    "Les services doivent comporter au plus 500 caractères.",
-  ).transform(transformCapitalize),
+  services: z
+    .string()
+    .max(500, {
+      message: "Le champ doit comporter au plus 500 caractères.",
+    })
+    .optional(),
 })
