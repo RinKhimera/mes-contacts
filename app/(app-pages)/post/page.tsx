@@ -5,7 +5,7 @@ const Post = async () => {
   const { userId } = await auth()
 
   return (
-    <div className="mx-auto max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
+    <div className="mx-auto w-full max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
       <div className="mt-10">
         <h1 className="text-4xl font-bold">
           Partagez votre expertise avec notre communauté !

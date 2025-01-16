@@ -39,7 +39,7 @@ export default function RootLayout({
     >
       <html lang="fr" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} className="flex justify-center" min-h-screen items-center antialiased`}
         >
           <ThemeProvider
             attribute="class"
