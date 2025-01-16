@@ -83,7 +83,7 @@ export default function SignUpPage() {
               <div className="absolute inset-0 flex items-center justify-center text-primary">
                 <Loader size={52} className="animate-spin" />
               </div>
-              <SignUp path="/auth/sign-up" forceRedirectUrl={"/onboarding"} />
+              <SignUp path="/auth/sign-up" forceRedirectUrl={"/dashboard"} />
             </div>
           </div>
         </div>

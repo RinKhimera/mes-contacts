@@ -82,7 +82,7 @@ export default function SignInPage() {
               <div className="absolute inset-0 flex items-center justify-center text-primary">
                 <Loader size={52} className="animate-spin" />
               </div>
-              <SignIn />
+              <SignIn path="/auth/sign-in" forceRedirectUrl={"/dashboard"} />
             </div>
           </div>
         </div>

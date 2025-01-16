@@ -15,7 +15,8 @@ const UploadInput = () => {
 
       setFiles([]) // Reset files after upload
     },
-    onUploadError: () => {
+    onUploadError: (error) => {
+      console.log(error)
       alert("error occurred while uploading")
     },
     onUploadBegin: (file) => {
