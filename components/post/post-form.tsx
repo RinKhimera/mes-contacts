@@ -37,6 +37,7 @@ import { citiesByProvinces } from "@/hooks"
 import { cn } from "@/lib/utils"
 import { postSchema } from "@/schemas/post"
 import { createPost } from "@/server/actions/post"
+import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -45,7 +46,9 @@ import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-export const PostForm = ({ userId }: { userId: string | null }) => {
+export const PostForm = () => {
+  const { userId } = useAuth()
+
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -94,7 +97,7 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mb-4 max-w-2xl space-y-4"
+        className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2"
       >
         <FormField
           control={form.control}
@@ -110,6 +113,27 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
               </FormControl>
               <FormDescription>
                 Il s&apos;agit de votre nom d&apos;affichage public.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Description de votre entreprise"
+                  className="min-h-[100px] resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Une description de votre entreprise.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -143,42 +167,6 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
                 <Input placeholder="example@xyz.com" {...field} />
               </FormControl>
               <FormDescription>Votre courriel public.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Description de votre entreprise"
-                  className="min-h-[100px] resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Une description de votre entreprise.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                <Input placeholder="1234 rue Example" {...field} />
-              </FormControl>
-              <FormDescription>Votre adresse publique.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -220,7 +208,7 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
           control={form.control}
           name="city"
           render={({ field }) => (
-            <FormItem className="flex w-full flex-col">
+            <FormItem>
               <FormLabel>Ville</FormLabel>
               <Popover>
                 <PopoverTrigger asChild disabled={!provinceValue}>
@@ -276,6 +264,21 @@ export const PostForm = ({ userId }: { userId: string | null }) => {
                 </PopoverContent>
               </Popover>
               <FormDescription>Votre ville publique.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Adresse</FormLabel>
+              <FormControl>
+                <Input placeholder="1234 rue Example" {...field} />
+              </FormControl>
+              <FormDescription>Votre adresse publique.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

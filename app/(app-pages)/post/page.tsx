@@ -1,9 +1,6 @@
 import { PostForm } from "@/components/post/post-form"
-import { auth } from "@clerk/nextjs/server"
 
-const Post = async () => {
-  const { userId } = await auth()
-
+const Post = () => {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
       <div className="mt-10">
@@ -16,7 +13,7 @@ const Post = async () => {
         </p>
       </div>
 
-      <PostForm userId={userId} />
+      <PostForm />
     </div>
   )
 }

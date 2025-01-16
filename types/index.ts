@@ -14,9 +14,9 @@ export type PostCardProps = {
   city: string
   province: string
   postalCode: string
-  description: string
-  services: string
+  description: string | null
+  services: string | null
   phone: string
   email: string
-  website: string
+  website?: string
 }

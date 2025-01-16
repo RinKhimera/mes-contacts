@@ -15,8 +15,8 @@ export const HomePosts = async () => {
             id={post.id}
             name={post.name}
             address={post.address}
-            description={post.description}
-            services={post.services}
+            description={post?.description}
+            services={post?.services}
             phone={post.phone}
             email={post.email}
             website={post.address}
