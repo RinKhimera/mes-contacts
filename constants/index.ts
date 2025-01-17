@@ -88,3 +88,77 @@ export const categoriesServices = [
   "Assurance",
   "Association Communautaire",
 ]
+
+export const data = {
+  teams: [
+    {
+      name: "Acme Inc",
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      plan: "Free",
+    },
+  ],
+  navMain: [
+    {
+      title: "Annonces",
+      url: "#",
+      isActive: true,
+      items: [
+        {
+          title: "Nouvelle annonce",
+          url: "/dashboard/new-post",
+        },
+        {
+          title: "Mes annonces",
+          url: "/dashboard/my-posts",
+        },
+        {
+          title: "Mes collections",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Paramètres",
+      url: "#",
+      items: [
+        {
+          title: "Compte",
+          url: "/account",
+        },
+        {
+          title: "Sécurité",
+          url: "/account/security",
+        },
+        // {
+        //   title: "Billing",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Limits",
+        //   url: "#",
+        // },
+      ],
+    },
+  ],
+  projects: [
+    {
+      name: "Design Engineering",
+      url: "#",
+    },
+    {
+      name: "Sales & Marketing",
+      url: "#",
+    },
+    {
+      name: "Travel",
+      url: "#",
+    },
+  ],
+}

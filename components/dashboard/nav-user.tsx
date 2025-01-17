@@ -1,5 +1,3 @@
-"use client"
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -14,10 +12,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { SignOutButton, useUser } from "@clerk/nextjs"
+import { SignOutButton } from "@clerk/nextjs"
+import { currentUser } from "@clerk/nextjs/server"
 import {
   BadgeCheck,
   Bell,
@@ -29,11 +27,10 @@ import {
 import Link from "next/link"
 import React from "react"
 
-export const NavUser = () => {
-  const { isMobile } = useSidebar()
+export const NavUser = async () => {
+  const user = await currentUser()
 
-  const { isLoaded, isSignedIn, user } = useUser()
-  if (!isLoaded || !isSignedIn) {
+  if (!user) {
     return <NavUserSkeleton />
   }
 
@@ -66,7 +63,7 @@ export const NavUser = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            // side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
@@ -93,7 +90,7 @@ export const NavUser = () => {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
-                Upgrade to Pro
+                Passer à la version Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
