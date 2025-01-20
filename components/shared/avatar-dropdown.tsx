@@ -23,6 +23,7 @@ export const AvatarDropdown = ({ user }: { user: User | null }) => {
           <AvatarFallback>XO</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent className="w-52" align="end" alignOffset={-1}>
         <DropdownMenuLabel>
           {user?.firstName} {user?.lastName}
@@ -32,16 +33,16 @@ export const AvatarDropdown = ({ user }: { user: User | null }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href={"/my-profile"}>
+          <Link href={"/account"}>
             <DropdownMenuItem className="cursor-pointer">
-              Mon profil
+              Compte
               <DropdownMenuShortcut>
                 <UserRound size={20} />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
 
-          <Link href={"/my-profile/security"}>
+          <Link href={"/account/security"}>
             <DropdownMenuItem className="cursor-pointer">
               Paramètres
               <DropdownMenuShortcut>

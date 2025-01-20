@@ -6,17 +6,13 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { listComponents } from "@/constants"
+import { navItems } from "@/constants"
 import type { User } from "@clerk/backend"
-import { Ellipsis, Info, KeyRound, LogIn, Rss } from "lucide-react"
+import { Ellipsis, KeyRound, LogIn } from "lucide-react"
 import Link from "next/link"
 
 type MobileMenuProps = {
@@ -24,86 +20,71 @@ type MobileMenuProps = {
   user: User | null
 }
 
+const AuthLinks = () => (
+  <>
+    <DropdownMenuSeparator />
+
+    <DropdownMenuGroup>
+      <Link href={"/auth/sign-in"}>
+        <DropdownMenuItem className="cursor-pointer">
+          Se connecter
+          <DropdownMenuShortcut>
+            <LogIn size={20} />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </Link>
+
+      <Link href={"/auth/sign-up"}>
+        <DropdownMenuItem className="cursor-pointer">
+          S&apos;inscrire
+          <DropdownMenuShortcut>
+            <KeyRound size={20} />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </Link>
+    </DropdownMenuGroup>
+  </>
+)
+
+const NavItems = () => (
+  <DropdownMenuGroup>
+    {navItems.map((item) => (
+      <Link key={item.href} href={item.href}>
+        <DropdownMenuItem className="cursor-pointer">
+          {item.label}
+        </DropdownMenuItem>
+      </Link>
+    ))}
+  </DropdownMenuGroup>
+)
+
 export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
   return (
     <nav className="flex items-center gap-2 lg:hidden">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size={"icon"} variant="outline">
+          <Button size={"icon"} variant="ghost">
             <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="w-52" align="end">
           <DropdownMenuGroup>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                Ma liste de contacts
-              </DropdownMenuSubTrigger>
-
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {listComponents.slice(0, -1).map((component) => (
-                    <Link key={component.title} href={component.href}>
-                      <DropdownMenuItem>{component.title}</DropdownMenuItem>
-                    </Link>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Voir la liste complète</DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-
-            <Link href={"/post"}>
-              <DropdownMenuItem className="cursor-pointer">
-                Annoncez avec nous
-                <DropdownMenuShortcut>
-                  <Rss size={20} />
-                </DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </Link>
-
-            <Link href={"/"}>
-              <DropdownMenuItem className="cursor-pointer">
-                Nous joindre
-                <DropdownMenuShortcut>
-                  <Info size={20} />
-                </DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </Link>
+            {userId && (
+              <Link href={"/dashboard"}>
+                <DropdownMenuItem className="cursor-pointer">
+                  Mon tableau de bord
+                </DropdownMenuItem>
+              </Link>
+            )}
+            <NavItems />
           </DropdownMenuGroup>
-
-          {!userId && (
-            <>
-              <DropdownMenuSeparator />
-
-              <DropdownMenuGroup>
-                <Link href={"/auth/sign-in"}>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Se connecter
-                    <DropdownMenuShortcut>
-                      <LogIn size={20} />
-                    </DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                </Link>
-
-                <Link href={"/auth/sign-up"}>
-                  <DropdownMenuItem className="cursor-pointer">
-                    S&apos;inscrire
-                    <DropdownMenuShortcut>
-                      <KeyRound size={20} />
-                    </DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                </Link>
-              </DropdownMenuGroup>
-            </>
-          )}
+          {!userId && <AuthLinks />}
         </DropdownMenuContent>
       </DropdownMenu>
 
       <ModeToggle />
 
-      {/* User Avatar */}
       {userId && <AvatarDropdown user={user} />}
     </nav>
   )

@@ -1,10 +1,15 @@
 export const menuItems = [
   // { href: "/", label: "mc.ca" },
   // { href: "/my-contacts", label: "Ma liste de contacts" },
-  { href: "/post", label: "Annoncez avec nous" },
-  { href: "/contact-us", label: "Nous joindre" },
+  { href: "/dashboard/new-post", label: "Nouvelle annonce" },
+  { href: "/dashboard", label: "Mon tableau de bord" },
   { href: "/login", label: "Connexion" },
   // { href: "/about", label: "A Propos" },
+]
+
+export const navItems = [
+  { href: "#", label: "Recherche de personnes" },
+  { href: "/dashboard/new-post", label: "Faire une annonce" },
 ]
 
 export const listComponents: {
@@ -106,10 +111,14 @@ export const data = {
   ],
   navMain: [
     {
-      title: "Annonces",
+      title: "Tableau de bord",
       url: "#",
       isActive: true,
       items: [
+        {
+          title: "Accueil",
+          url: "/dashboard",
+        },
         {
           title: "Nouvelle annonce",
           url: "/dashboard/new-post",
