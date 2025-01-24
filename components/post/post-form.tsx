@@ -19,11 +19,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -37,11 +39,12 @@ import { citiesByProvinces } from "@/hooks"
 import { cn } from "@/lib/utils"
 import { postSchema } from "@/schemas/post"
 import { createPost } from "@/server/actions/post"
+import { useUploadThing } from "@/utils/uploadthing"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -49,30 +52,88 @@ import { z } from "zod"
 export const PostForm = () => {
   const { userId } = useAuth()
 
-  const [isPending, startTransition] = useTransition()
   const router = useRouter()
+
+  const [isPending, startTransition] = useTransition()
+
+  const [businessNameStatus, setBusinessNameStatus] = useState<
+    string | undefined
+  >("Non")
+
+  const [businessImageStatus, setbusinessImageStatus] = useState<
+    string | undefined
+  >("Non")
+
+  const [files, setFiles] = useState<File[]>([])
+
+  const handleBusinessNameChange = (value: string) => {
+    setBusinessNameStatus(value)
+    // Reset form fields when radio selection changes
+    form.setValue("businessName", undefined)
+  }
+
+  const handleBusinessImageChange = (value: string) => {
+    setbusinessImageStatus(value)
+    // Reset form fields and files when radio selection changes
+    form.setValue("businessImageUrl", undefined)
+    setFiles([])
+  }
+
+  const { startUpload } = useUploadThing("imageUploader", {
+    onClientUploadComplete: (response) => {
+      console.log(response)
+      setFiles([]) // Reset files after upload
+    },
+    onUploadError: (error) => {
+      console.log(error)
+      alert("error occurred while uploading")
+    },
+    onUploadBegin: (file) => {
+      console.log("upload has begun for", file)
+    },
+    onUploadProgress: (progress) => {
+      console.log(progress)
+    },
+  })
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files
+    if (fileList) {
+      setFiles(Array.from(fileList))
+    }
+  }
 
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      name: "",
+      businessName: undefined,
+      businessImageUrl: undefined,
+      category: "",
+      description: undefined,
+      services: undefined,
       phone: "",
       email: "",
-      // website: "",
-      description: undefined,
+      website: undefined,
       address: "",
-      // province: "",
+      province: "",
       city: "",
       postalCode: "",
-      category: "",
-      services: undefined,
     },
   })
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     startTransition(async () => {
       try {
-        console.log(data, userId)
+        // Handle file upload first
+        if (files.length > 0) {
+          const res = await startUpload(files)
+          if (res && res[0]) {
+            // Update the form data with the uploaded file URL
+            data.businessImageUrl = res[0].url
+          }
+        }
+
+        console.log("Form data with uploaded file:", data, userId)
         if (!userId) throw new Error("You must be logged in to create a post")
 
         await createPost({ data, userId })
@@ -97,22 +158,118 @@ export const PostForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2"
+        className="mb-4 grid grid-cols-1 gap-4"
       >
+        <h2 className="text-xl">Informations sur l&apos;entreprise</h2>
+
+        <Label>Avez-vous un nom d&apos;entreprise ?</Label>
+        <RadioGroup
+          defaultValue={businessNameStatus}
+          onValueChange={handleBusinessNameChange}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="Oui" id="yesName" />
+            <Label htmlFor="yesName">Oui</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="Non" id="noName" />
+            <Label htmlFor="noName">Non</Label>
+          </div>
+        </RadioGroup>
+
+        {businessNameStatus === "Oui" && (
+          <FormField
+            control={form.control}
+            name="businessName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom de l&apos;entreprise</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Clinique | Restaurant | Garage John Doe"
+                    required
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Il s&apos;agit de votre nom d&apos;affichage public.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <Label>Avez-vous un logo ?</Label>
+        <RadioGroup
+          defaultValue={businessImageStatus}
+          onValueChange={handleBusinessImageChange}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="Oui" id="yesLogo" />
+            <Label htmlFor="yesLogo">Oui</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="Non" id="noLogo" />
+            <Label htmlFor="noLogo">Non</Label>
+          </div>
+        </RadioGroup>
+
+        {businessImageStatus === "Oui" && (
+          <FormField
+            control={form.control}
+            name="businessImageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="picture">Logo d&apos;entreprise</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    required
+                    id="picture"
+                    type="file"
+                    onChange={handleFileChange}
+                  />
+                </FormControl>
+                <FormMessage />
+                {/* <button
+                  onClick={() => startUpload(files)}
+                  disabled={files.length === 0}
+                >
+                  Upload
+                </button> */}
+              </FormItem>
+            )}
+          />
+        )}
+
         <FormField
           control={form.control}
-          name="name"
+          name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom de l&apos;entreprise</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Clinique | Restaurant | Garage John Doe"
-                  {...field}
-                />
-              </FormControl>
+              <FormLabel>Catégorie</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value)
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez la catégorie de votre entreprise ou activité" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categoriesServices.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormDescription>
-                Il s&apos;agit de votre nom d&apos;affichage public.
+                La catégorie de votre entreprise ou activité.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -127,13 +284,33 @@ export const PostForm = () => {
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Description de votre entreprise"
+                  placeholder="Description de votre entreprise ou activité"
                   className="min-h-[100px] resize-none"
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Une description de votre entreprise.
+                Une description de votre entreprise ou activité.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="services"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Services</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Service 1, Service 2, Service 3"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Les services que vous ou votre entreprise offrez.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -167,6 +344,21 @@ export const PostForm = () => {
                 <Input placeholder="example@xyz.com" {...field} />
               </FormControl>
               <FormDescription>Votre courriel public.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Site web</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com" {...field} />
+              </FormControl>
+              <FormDescription>Votre site web public.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -294,59 +486,6 @@ export const PostForm = () => {
                 <Input placeholder="H0H 0H0" {...field} />
               </FormControl>
               <FormDescription>Votre code postal publique.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Catégorie</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value)
-                }}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez la catégorie de votre entreprise" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categoriesServices.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                La catégorie de votre entreprise.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="services"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Services</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Service 1, Service 2, Service 3"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Les services offerts par votre entreprise.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

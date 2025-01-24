@@ -7,16 +7,19 @@ export type CitiesProps = {
   admin2: string // Code administratif de second niveau (district/commune), peut être vide
 }[]
 
-export type PostCardProps = {
+export type PostProps = {
   id: string
-  name: string
-  address: string
-  city: string
-  province: string
-  postalCode: string
-  description: string | null
-  services: string | null
+  authorId?: string
+  businessName?: string | null
+  businessImageUrl?: string | null
+  category: string
+  description?: string | null
+  services?: string | null
   phone: string
   email: string
-  website?: string
+  website?: string | null
+  address: string
+  province: string
+  city: string
+  postalCode: string
 }

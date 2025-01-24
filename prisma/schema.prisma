@@ -14,18 +14,20 @@ datasource db {
 }
 
 model Post {
-  id          String   @id @default(uuid())
-  authorId    String
-  name        String
-  phone       String
-  email       String
-  description String?
-  address     String
-  province    String
-  city        String
-  postalCode  String
-  category    String
-  services    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(uuid())
+  authorId         String
+  businessName     String?
+  businessImageUrl String?
+  category         String
+  description      String?
+  services         String?
+  phone            String
+  email            String
+  website          String?
+  address          String
+  province         String
+  city             String
+  postalCode       String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

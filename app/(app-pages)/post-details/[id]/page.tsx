@@ -10,7 +10,7 @@ const PostDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
       </h1>
 
       <div>Post id: {post?.id}</div>
-      <div>{post?.name}</div>
+      <div>{post?.businessName}</div>
       <div>{post?.address}</div>
       <div>{post?.city}</div>
       <div>{post?.province}</div>

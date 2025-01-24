@@ -25,10 +25,10 @@ const NavMain = () => {
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {data.navMain.map((item, index) => (
+        {data.navMain.map((item) => (
           <Collapsible
             key={item.title}
-            defaultOpen={index === 0}
+            defaultOpen={true}
             className="group/collapsible"
           >
             <SidebarMenuItem>

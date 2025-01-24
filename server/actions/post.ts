@@ -18,16 +18,18 @@ export const createPost = async ({
   const post = await prisma.post.create({
     data: {
       authorId: userId,
-      name: data.name,
+      businessName: data.businessName,
+      businessImageUrl: data.businessImageUrl,
+      category: data.category,
+      description: data.description,
+      services: data.services,
       phone: data.phone,
       email: data.email,
-      description: data.description,
+      website: data.website,
       address: data.address,
       province: data.province,
       city: data.city,
       postalCode: data.postalCode,
-      category: data.category,
-      services: data.services,
     },
   })
 

@@ -1,5 +1,4 @@
 import { HomePosts } from "@/components/home/home-posts"
-import UploadInput from "@/components/shared/upload-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
@@ -11,7 +10,7 @@ export default function Home() {
         Trouvez des services et des entreprises au Québec et le reste du Canada
       </div>
 
-      <UploadInput />
+      {/* <UploadInput /> */}
 
       <form className="mx-auto my-8 flex w-full max-w-xl flex-col gap-0 max-sm:gap-2 sm:flex-row">
         <div className="flex flex-grow flex-col gap-2 sm:flex-row">
