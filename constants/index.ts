@@ -128,7 +128,7 @@ export const data = {
           url: "/dashboard/my-posts",
         },
         {
-          title: "Mes collections",
+          title: "Mes favoris",
           url: "#",
         },
       ],

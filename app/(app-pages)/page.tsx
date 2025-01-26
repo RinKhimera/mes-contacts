@@ -6,9 +6,9 @@ import { Search } from "lucide-react"
 export default function Home() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
-      <div className="mx-auto mt-10 max-w-xl text-center text-2xl font-bold lg:text-3xl">
+      <h1 className="mx-auto mt-10 max-w-xl text-center text-2xl font-bold lg:text-3xl">
         Trouvez des services et des entreprises au Québec et le reste du Canada
-      </div>
+      </h1>
 
       {/* <UploadInput /> */}
 

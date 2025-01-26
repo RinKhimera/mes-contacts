@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { PostProps } from "@/types"
+import { auth } from "@clerk/nextjs/server"
 import { Globe, Mail, Phone } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-export const PostCard = ({
+export const PostCard = async ({
   id,
   businessName,
   businessImageUrl,
@@ -21,6 +22,8 @@ export const PostCard = ({
   city,
   postalCode,
 }: PostProps) => {
+  const { userId } = await auth()
+
   return (
     <div className="w-full max-w-2xl cursor-default md:ml-5">
       <Card className="flex bg-muted p-0 transition-colors hover:bg-muted/50 max-sm:flex-col">
@@ -28,14 +31,18 @@ export const PostCard = ({
           <AspectRatio ratio={1} className="bg-muted">
             <Image
               src={businessImageUrl || postImagePlaceholder}
-              alt="Photo by Drew Beamer"
+              alt="Business image"
               className="rounded-md object-cover"
               fill
             />
           </AspectRatio>
         </div>
         <div className="flex-1">
-          <Link href={`/post-details/${id}`}>
+          <Link
+            href={
+              userId ? `/dashboard/post-details/${id}` : `/post-details/${id}`
+            }
+          >
             <CardContent className="flex flex-col space-y-0 pt-4 tracking-tight">
               <h1 className="text-2xl font-bold transition hover:underline">
                 {businessName}
