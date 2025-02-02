@@ -22,7 +22,6 @@ export const createPost = async ({
       businessImageUrl: data.businessImageUrl,
       category: data.category,
       description: data.description,
-      services: data.services,
       phone: data.phone,
       email: data.email,
       website: data.website,
@@ -30,6 +29,7 @@ export const createPost = async ({
       province: data.province,
       city: data.city,
       postalCode: data.postalCode,
+      status: "DRAFT",
     },
   })
 

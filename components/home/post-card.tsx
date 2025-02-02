@@ -2,26 +2,13 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
-import { PostProps } from "@/types"
 import { auth } from "@clerk/nextjs/server"
+import type { Post } from "@prisma/client"
 import { Globe, Mail, Phone } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-export const PostCard = async ({
-  id,
-  businessName,
-  businessImageUrl,
-  description,
-  services,
-  phone,
-  email,
-  website,
-  address,
-  province,
-  city,
-  postalCode,
-}: PostProps) => {
+export const PostCard = async ({ post }: { post: Post }) => {
   const { userId } = await auth()
 
   return (
@@ -30,7 +17,7 @@ export const PostCard = async ({
         <div className="flex w-[180px] items-center justify-center pl-6 max-sm:pt-4 sm:pl-4">
           <AspectRatio ratio={1} className="bg-muted">
             <Image
-              src={businessImageUrl || postImagePlaceholder}
+              src={post.businessImageUrl || postImagePlaceholder}
               alt="Business image"
               className="rounded-md object-cover"
               fill
@@ -40,36 +27,37 @@ export const PostCard = async ({
         <div className="flex-1">
           <Link
             href={
-              userId ? `/dashboard/post-details/${id}` : `/post-details/${id}`
+              userId
+                ? `/dashboard/post-details/${post.id}`
+                : `/post-details/${post.id}`
             }
           >
             <CardContent className="flex flex-col space-y-0 pt-4 tracking-tight">
               <h1 className="text-2xl font-bold transition hover:underline">
-                {businessName}
+                {post.businessName}
               </h1>
               <p className="pb-2 text-muted-foreground">
-                {`${address}, ${city} ${province} ${postalCode}`}
+                {`${post.address}, ${post.city} ${post.province} ${post.postalCode}`}
               </p>
-              <p>{description}</p>
-              <p className="text-sm text-muted-foreground">{services}</p>
+              <p>{post.description}</p>
             </CardContent>
           </Link>
           <CardFooter className="flex flex-col space-y-2 pt-0 sm:flex-row sm:space-x-2 sm:space-y-0">
             <Button className="w-full sm:w-auto" asChild>
-              <Link href={`tel:${phone}`} target="_blank">
+              <Link href={`tel:${post.phone}`} target="_blank">
                 <Phone className="mr-2 h-4 w-4" />
                 Téléphone
               </Link>
             </Button>
             <Button className="w-full sm:w-auto" asChild>
-              <Link href={`mailto:${email}`} target="_blank">
+              <Link href={`mailto:${post.email}`} target="_blank">
                 <Mail className="mr-2 h-4 w-4" />
                 Courriel
               </Link>
             </Button>
-            {website && (
+            {post.website && (
               <Button className="w-full sm:w-auto" asChild>
-                <Link href={website} target="_blank">
+                <Link href={post.website} target="_blank">
                   <Globe className="mr-2 h-4 w-4" />
                   Site web
                 </Link>

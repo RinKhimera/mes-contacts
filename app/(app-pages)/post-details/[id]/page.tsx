@@ -16,7 +16,6 @@ const PostDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
       <div>{post?.province}</div>
       <div>{post?.postalCode}</div>
       <div>{post?.description}</div>
-      <div>{post?.services}</div>
       <div>{post?.phone}</div>
       <div>{post?.email}</div>
     </div>

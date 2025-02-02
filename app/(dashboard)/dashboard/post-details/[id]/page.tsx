@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/tooltip"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { getPostById } from "@/server/actions/post"
-import { clerkClient } from "@clerk/nextjs/server"
+// import { clerkClient } from "@clerk/nextjs/server"
 import { Globe, Mail, Phone } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -23,9 +23,9 @@ const DashboardPostDetails = async ({
   const post = await getPostById((await params).id)
   if (!post) notFound()
 
-  const client = await clerkClient()
-  const user = await client.users.getUser(post.authorId)
-  const authorName = user.fullName
+  // const client = await clerkClient()
+  // const user = await client.users.getUser(post.authorId)
+  // const authorName = user.fullName
 
   return (
     <div className="p-4 pt-0">
@@ -47,9 +47,7 @@ const DashboardPostDetails = async ({
 
             <div className="flex-1 pl-4">
               <div className="flex flex-col space-y-0 pt-4 tracking-tight">
-                <h1 className="text-3xl font-bold">
-                  {post.businessName || authorName}
-                </h1>
+                <h1 className="text-3xl font-bold">{post.businessName}</h1>
                 <p className="pb-2 text-muted-foreground">
                   {`${post.address}, ${post.city} ${post.province} ${post.postalCode}`}
                 </p>
@@ -94,17 +92,6 @@ const DashboardPostDetails = async ({
               <p>{post.description}</p>
             ) : (
               <p className="italic text-muted-foreground">Aucune description</p>
-            )}
-          </div>
-
-          <div className="">
-            <h3 className="text-2xl font-semibold tracking-tight">Services</h3>
-            {post.services ? (
-              <p>{post.services}</p>
-            ) : (
-              <p className="italic text-muted-foreground">
-                Aucun service spécifié
-              </p>
             )}
           </div>
 

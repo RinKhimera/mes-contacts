@@ -9,7 +9,7 @@ const NewPost = () => {
         vos services ou vos offres spéciales. C’est rapide et facile !
       </p>
 
-      <PostForm />
+      <PostForm post={undefined} />
     </div>
   )
 }

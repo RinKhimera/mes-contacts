@@ -16,33 +16,24 @@ const transformCapitalize = (val: string) =>
   val.length > 0 ? val.charAt(0).toUpperCase() + val.slice(1) : val
 
 export const postSchema = z.object({
-  businessName: z
-    .string()
-    .trim()
-    .max(50, {
-      message: "Le champ doit comporter au plus 50 caractères.",
-    })
-    .transform(transformCapitalize)
-    .optional(),
-  businessImageUrl: z.string().optional(),
   category: requiredString(
     1,
     50,
     "Cette entrée est requise.",
     "La catégorie doit comporter au plus 50 caractères.",
   ),
+  businessName: requiredString(
+    1,
+    50,
+    "Cette entrée est requise.",
+    "Le nom commercial doit comporter au plus 50 caractères.",
+  ).transform(transformCapitalize),
+  businessImageUrl: z.string().optional(),
   description: z
     .string()
     .trim()
     .max(500, {
       message: "La description doit comporter au plus 500 caractères.",
-    })
-    .transform(transformCapitalize)
-    .optional(),
-  services: z
-    .string()
-    .max(500, {
-      message: "Le champ doit comporter au plus 500 caractères.",
     })
     .transform(transformCapitalize)
     .optional(),

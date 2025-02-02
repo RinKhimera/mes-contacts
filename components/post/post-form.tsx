@@ -42,6 +42,7 @@ import { createPost } from "@/server/actions/post"
 import { useUploadThing } from "@/utils/uploadthing"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
+import type { Post } from "@prisma/client"
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -49,16 +50,16 @@ import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-export const PostForm = () => {
+export const PostForm = ({ post }: { post: Post | undefined }) => {
   const { userId } = useAuth()
 
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
 
-  const [businessNameStatus, setBusinessNameStatus] = useState<
-    string | undefined
-  >("Non")
+  // const [businessNameStatus, setBusinessNameStatus] = useState<
+  //   string | undefined
+  // >("Non")
 
   const [businessImageStatus, setbusinessImageStatus] = useState<
     string | undefined
@@ -66,11 +67,11 @@ export const PostForm = () => {
 
   const [files, setFiles] = useState<File[]>([])
 
-  const handleBusinessNameChange = (value: string) => {
-    setBusinessNameStatus(value)
-    // Reset form fields when radio selection changes
-    form.setValue("businessName", undefined)
-  }
+  // const handleBusinessNameChange = (value: string) => {
+  //   setBusinessNameStatus(value)
+  //   // Reset form fields when radio selection changes
+  //   form.setValue("businessName", undefined)
+  // }
 
   const handleBusinessImageChange = (value: string) => {
     setbusinessImageStatus(value)
@@ -106,18 +107,17 @@ export const PostForm = () => {
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      businessName: undefined,
-      businessImageUrl: undefined,
-      category: "",
-      description: undefined,
-      services: undefined,
-      phone: "",
-      email: "",
-      website: undefined,
-      address: "",
-      province: "",
-      city: "",
-      postalCode: "",
+      businessName: post?.businessName || "",
+      businessImageUrl: post?.businessImageUrl || undefined,
+      category: post?.category || "",
+      description: post?.description || undefined,
+      phone: post?.phone || "",
+      email: post?.email || "",
+      website: post?.website || undefined,
+      address: post?.address || "",
+      province: post?.province || "",
+      city: post?.city || "",
+      postalCode: post?.postalCode || "",
     },
   })
 
@@ -137,8 +137,8 @@ export const PostForm = () => {
         if (!userId) throw new Error("You must be logged in to create a post")
 
         await createPost({ data, userId })
-        router.push("/")
-        // toast.success("La publication a été ajoutée à vos collections")
+        router.push("/dashboard/my-posts")
+        toast.success("La publication a été ajoutée à vos collections")
       } catch (error) {
         console.error(error)
         toast.error("Une erreur s'est produite !", {
@@ -160,45 +160,60 @@ export const PostForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="mb-4 grid grid-cols-1 gap-4"
       >
-        <h2 className="text-xl">Informations sur l&apos;entreprise</h2>
+        <h2 className="text-xl">Informations sur l&apos;annonce</h2>
 
-        <Label>Avez-vous un nom d&apos;entreprise ?</Label>
-        <RadioGroup
-          defaultValue={businessNameStatus}
-          onValueChange={handleBusinessNameChange}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Oui" id="yesName" />
-            <Label htmlFor="yesName">Oui</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Non" id="noName" />
-            <Label htmlFor="noName">Non</Label>
-          </div>
-        </RadioGroup>
-
-        {businessNameStatus === "Oui" && (
-          <FormField
-            control={form.control}
-            name="businessName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom de l&apos;entreprise</FormLabel>
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Catégorie</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value)
+                }}
+                defaultValue={field.value}
+              >
                 <FormControl>
-                  <Input
-                    placeholder="Clinique | Restaurant | Garage John Doe"
-                    required
-                    {...field}
-                  />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez la catégorie" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormDescription>
-                  Il s&apos;agit de votre nom d&apos;affichage public.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                <SelectContent>
+                  {categoriesServices.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                La catégorie à laquelle votre entreprise ou activité appartient.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="businessName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom commercial</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Clinique | Restaurant | Garage John Doe"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Ce nom sera affiché publiquement.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Label>Avez-vous un logo ?</Label>
         <RadioGroup
@@ -245,39 +260,6 @@ export const PostForm = () => {
 
         <FormField
           control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Catégorie</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value)
-                }}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez la catégorie de votre entreprise ou activité" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categoriesServices.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                La catégorie de votre entreprise ou activité.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="description"
           render={({ field }) => (
             <FormItem>
@@ -291,26 +273,6 @@ export const PostForm = () => {
               </FormControl>
               <FormDescription>
                 Une description de votre entreprise ou activité.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="services"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Services</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Service 1, Service 2, Service 3"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Les services que vous ou votre entreprise offrez.
               </FormDescription>
               <FormMessage />
             </FormItem>

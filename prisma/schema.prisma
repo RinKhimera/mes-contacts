@@ -16,11 +16,10 @@ datasource db {
 model Post {
   id               String   @id @default(uuid())
   authorId         String
-  businessName     String?
+  businessName     String
   businessImageUrl String?
   category         String
   description      String?
-  services         String?
   phone            String
   email            String
   website          String?
@@ -28,6 +27,7 @@ model Post {
   province         String
   city             String
   postalCode       String
+  status           String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
