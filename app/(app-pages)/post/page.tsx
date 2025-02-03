@@ -13,7 +13,7 @@ const Post = () => {
         </p>
       </div>
 
-      <PostForm />
+      <PostForm post={undefined} />
     </div>
   )
 }
