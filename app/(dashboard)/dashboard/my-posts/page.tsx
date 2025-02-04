@@ -1,4 +1,4 @@
-// import UserPostCard from "@/components/dashboard/user-post-card"
+import { DeletePostButton } from "@/components/dashboard/delete-post-button"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,17 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { getPostsByUserId } from "@/server/actions/post"
-import { auth } from "@clerk/nextjs/server"
+import { getUserPosts } from "@/server/actions/post"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pencil, ShoppingCart } from "lucide-react"
 import Link from "next/link"
 
 const MyPosts = async () => {
-  const { userId } = await auth()
-
-  const userPosts = await getPostsByUserId(userId!)
+  const userPosts = await getUserPosts()
 
   return (
     <div className="p-4 pt-0">
@@ -30,11 +27,11 @@ const MyPosts = async () => {
         <TableCaption>Liste de vos annonces</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[200px]">Catégorie</TableHead>
-            <TableHead>Nom de l&apos;annonce</TableHead>
-            <TableHead>Date de création</TableHead>
-            <TableHead className="text-center">Statut</TableHead>
-            <TableHead className="w-[200px] text-center">Actions</TableHead>
+            <TableHead className="">Catégorie</TableHead>
+            <TableHead className="">Nom de l&apos;annonce</TableHead>
+            <TableHead className="">Date de création</TableHead>
+            <TableHead className="">Statut</TableHead>
+            <TableHead className="">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,36 +45,50 @@ const MyPosts = async () => {
                 </TableCell>
                 <TableCell>
                   {post.status === "PUBLISHED" && (
-                    <div className="flex items-end justify-center">
+                    <div className="">
                       <Badge variant={"published"}>En ligne</Badge>
                     </div>
                   )}
                   {post.status === "DRAFT" && (
-                    <div className="flex items-end justify-center">
+                    <div className="">
                       <Badge variant={"draft"}>En attente</Badge>
                     </div>
                   )}
                   {post.status === "DISABLED" && (
-                    <div className="flex items-end justify-center">
+                    <div className="">
                       <Badge variant={"disabled"}>Désactivé</Badge>
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="">
-                  <div className="flex justify-center gap-2">
+                <TableCell>
+                  <div className="space-x-2">
                     <Button size={"icon"} variant={"outline"} asChild>
                       <Link href={`/dashboard/post-details/${post.id}`}>
                         <Eye size={20} />
                       </Link>
                     </Button>
-                    <Button size={"icon"} variant={"outline"}>
+
+                    <Button
+                      size={"icon"}
+                      variant={"outline"}
+                      className="hover:bg-blue-600"
+                    >
                       <Link href={`/dashboard/edit-post/${post.id}`}>
                         <Pencil size={20} />
                       </Link>
                     </Button>
-                    <Button size={"icon"} variant={"outline"}>
-                      <Trash2 size={20} />
+
+                    <Button
+                      size={"icon"}
+                      variant={"outline"}
+                      className="hover:bg-green-600"
+                    >
+                      <Link href={`#`}>
+                        <ShoppingCart size={20} />
+                      </Link>
                     </Button>
+
+                    <DeletePostButton postId={post.id} />
                   </div>
                 </TableCell>
               </TableRow>

@@ -37,22 +37,22 @@ import { Textarea } from "@/components/ui/textarea"
 import { categoriesServices, provinces } from "@/constants"
 import { citiesByProvinces } from "@/hooks"
 import { cn } from "@/lib/utils"
+import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { postSchema } from "@/schemas/post"
-import { createPost } from "@/server/actions/post"
+import { createPost, updatePost } from "@/server/actions/post"
 import { useUploadThing } from "@/utils/uploadthing"
-import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { Post } from "@prisma/client"
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
+import { AspectRatio } from "../ui/aspect-ratio"
 
 export const PostForm = ({ post }: { post: Post | undefined }) => {
-  const { userId } = useAuth()
-
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
@@ -87,7 +87,7 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
     },
     onUploadError: (error) => {
       console.log(error)
-      alert("error occurred while uploading")
+      // alert("error occurred while uploading")
     },
     onUploadBegin: (file) => {
       console.log("upload has begun for", file)
@@ -133,17 +133,20 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
           }
         }
 
-        console.log("Form data with uploaded file:", data, userId)
-        if (!userId) throw new Error("You must be logged in to create a post")
-
-        await createPost({ data, userId })
-        router.push("/dashboard/my-posts")
-        toast.success("La publication a été ajoutée à vos collections")
+        if (post) {
+          await updatePost({ postId: post.id, data })
+          router.push("/dashboard/my-posts")
+          toast.success("La publication a été mise à jour avec succès")
+        } else {
+          await createPost(data)
+          router.push("/dashboard/my-posts")
+          toast.success("La publication a été créée avec succès")
+        }
       } catch (error) {
         console.error(error)
         toast.error("Une erreur s'est produite !", {
           description:
-            "Veuillez vérifier votre connexion internet et réessayer",
+            "Veuillez vérifier votre connexion internet et réessayer. Si le problème persiste, veuillez contacter le support.",
         })
       }
     })
@@ -215,20 +218,59 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
           )}
         />
 
-        <Label>Avez-vous un logo ?</Label>
-        <RadioGroup
-          defaultValue={businessImageStatus}
-          onValueChange={handleBusinessImageChange}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Oui" id="yesLogo" />
-            <Label htmlFor="yesLogo">Oui</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Non" id="noLogo" />
-            <Label htmlFor="noLogo">Non</Label>
-          </div>
-        </RadioGroup>
+        {!post ? (
+          <>
+            <Label>
+              Voulez-vous une photo ou un logo associé à votre nom commercial ?
+            </Label>
+            <RadioGroup
+              defaultValue={businessImageStatus}
+              onValueChange={handleBusinessImageChange}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Oui" id="yesLogo" />
+                <Label htmlFor="yesLogo">Oui</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Non" id="noLogo" />
+                <Label htmlFor="noLogo">Non</Label>
+              </div>
+            </RadioGroup>
+          </>
+        ) : (
+          <>
+            <div>
+              <FormLabel>
+                Votre photo ou votre logo associé à votre nom commercial
+              </FormLabel>
+              <div className="flex w-[100px] items-center justify-center pt-2">
+                <AspectRatio ratio={1} className="bg-muted">
+                  <Image
+                    src={post.businessImageUrl || postImagePlaceholder}
+                    alt="Business image"
+                    className="rounded-md object-cover"
+                    fill
+                  />
+                </AspectRatio>
+              </div>
+            </div>
+
+            <Label>Modifier votre image actuelle ?</Label>
+            <RadioGroup
+              defaultValue={businessImageStatus}
+              onValueChange={handleBusinessImageChange}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Oui" id="yesLogo" />
+                <Label htmlFor="yesLogo">Oui</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Non" id="noLogo" />
+                <Label htmlFor="noLogo">Non</Label>
+              </div>
+            </RadioGroup>
+          </>
+        )}
 
         {businessImageStatus === "Oui" && (
           <FormField
@@ -236,7 +278,7 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
             name="businessImageUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="picture">Logo d&apos;entreprise</FormLabel>
+                <FormLabel htmlFor="picture">Image associée</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -246,6 +288,9 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
                     onChange={handleFileChange}
                   />
                 </FormControl>
+                <FormDescription>
+                  Votre photo ou votre logo associé à votre nom commercial.
+                </FormDescription>
                 <FormMessage />
                 {/* <button
                   onClick={() => startUpload(files)}
@@ -454,7 +499,11 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
         />
 
         <Button type="submit" disabled={isPending}>
-          {isPending ? <LoaderCircle className="animate-spin" /> : "Soumettre"}
+          {isPending ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            "Enregistrer"
+          )}
         </Button>
       </form>
     </Form>

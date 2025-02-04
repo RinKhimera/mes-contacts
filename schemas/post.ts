@@ -39,19 +39,20 @@ export const postSchema = z.object({
     .optional(),
   phone: z
     .string()
-    .regex(/^[2-9][0-9]{2}[2-9][0-9]{2}[0-9]{4}$/, {
-      message:
-        "Le numéro de téléphone doit être un numéro canadien valide composé uniquement de chiffres.",
-    })
-    .min(10, {
-      message: "Le numéro de téléphone doit comporter au moins 10 caractères.",
-    })
-    .max(10, {
-      message: "Le numéro de téléphone doit comporter au plus 10 caractères.",
-    })
-    .transform(
-      (val) => `(${val.slice(0, 3)}) ${val.slice(3, 6)}-${val.slice(6)}`,
-    ),
+    .regex(
+      /^\+?1?\s*(?:\([0-9]{3}\)|[0-9]{3})[-.\s]*[0-9]{3}[-.\s]*[0-9]{4}$/,
+      {
+        message: "Le numéro de téléphone doit être un numéro canadien valide.",
+      },
+    )
+    .transform((val) => {
+      // Remove all non-digits
+      const digits = val.replace(/\D/g, "")
+      // Remove leading 1 if present
+      const cleanDigits = digits.length === 11 ? digits.slice(1) : digits
+      // Format as (XXX) XXX-XXXX
+      return `(${cleanDigits.slice(0, 3)}) ${cleanDigits.slice(3, 6)}-${cleanDigits.slice(6)}`
+    }),
   email: z
     .string()
     .trim()

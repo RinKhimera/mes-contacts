@@ -40,6 +40,8 @@ const DashboardPostDetails = async ({
                   src={post.businessImageUrl || postImagePlaceholder}
                   alt="Business image"
                   className="rounded-md object-cover"
+                  priority
+                  // placeholder="blur"
                   fill
                 />
               </AspectRatio>
