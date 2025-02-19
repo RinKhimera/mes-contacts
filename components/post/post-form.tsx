@@ -163,14 +163,14 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="mb-4 grid grid-cols-1 gap-4"
       >
-        <h2 className="text-xl">Informations sur l&apos;annonce</h2>
+        <h2 className="text-xl">Informations de votre annonce</h2>
 
         <FormField
           control={form.control}
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Catégorie</FormLabel>
+              <FormLabel>Catégorie de votre service</FormLabel>
               <Select
                 onValueChange={(value) => {
                   field.onChange(value)
@@ -221,7 +221,7 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
         {!post ? (
           <>
             <Label>
-              Voulez-vous une photo ou un logo associé à votre nom commercial ?
+              Avez-vous une photo ou un logo associé à votre nom commercial ?
             </Label>
             <RadioGroup
               defaultValue={businessImageStatus}
@@ -276,28 +276,25 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
           <FormField
             control={form.control}
             name="businessImageUrl"
-            render={({ field }) => (
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
-                <FormLabel htmlFor="picture">Image associée</FormLabel>
+                <FormLabel htmlFor="picture">
+                  Chargez le logo ou l&apos;image associée
+                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    required
                     id="picture"
                     type="file"
                     onChange={handleFileChange}
+                    value={undefined}
                   />
                 </FormControl>
                 <FormDescription>
                   Votre photo ou votre logo associé à votre nom commercial.
                 </FormDescription>
                 <FormMessage />
-                {/* <button
-                  onClick={() => startUpload(files)}
-                  disabled={files.length === 0}
-                >
-                  Upload
-                </button> */}
               </FormItem>
             )}
           />
@@ -308,7 +305,7 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Description du service</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Description de votre entreprise ou activité"
