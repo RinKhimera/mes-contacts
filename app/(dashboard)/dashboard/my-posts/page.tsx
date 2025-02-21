@@ -1,3 +1,4 @@
+import { CheckoutButton } from "@/components/dashboard/checkout-button"
 import { DeletePostButton } from "@/components/dashboard/delete-post-button"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,7 +14,7 @@ import {
 import { getUserPosts } from "@/server/actions/post"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Eye, Pencil, ShoppingCart } from "lucide-react"
+import { Eye, Pencil } from "lucide-react"
 import Link from "next/link"
 
 const MyPosts = async () => {
@@ -78,15 +79,7 @@ const MyPosts = async () => {
                       </Link>
                     </Button>
 
-                    <Button
-                      size={"icon"}
-                      variant={"outline"}
-                      className="hover:bg-green-600"
-                    >
-                      <Link href={`#`}>
-                        <ShoppingCart size={20} />
-                      </Link>
-                    </Button>
+                    <CheckoutButton postId={post.id} />
 
                     <DeletePostButton postId={post.id} />
                   </div>

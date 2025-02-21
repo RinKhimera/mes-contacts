@@ -13,8 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  DISABLED
+}
+
 model Post {
-  id               String   @id @default(uuid())
+  id               String     @id @default(uuid())
   authorId         String
   businessName     String
   businessImageUrl String?
@@ -27,7 +33,7 @@ model Post {
   province         String
   city             String
   postalCode       String
-  status           String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  status           PostStatus @default(DRAFT)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 }
