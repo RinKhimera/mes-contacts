@@ -48,7 +48,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { AspectRatio } from "../ui/aspect-ratio"
 
-export const PostForm = ({ post }: { post: Post | undefined }) => {
+const PostForm = ({ post }: { post: Post | undefined }) => {
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
@@ -534,3 +534,5 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
     </div>
   )
 }
+
+export default PostForm

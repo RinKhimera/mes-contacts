@@ -10,8 +10,6 @@ export default function Home() {
         Trouvez des services et des entreprises au Québec et le reste du Canada
       </h1>
 
-      {/* <UploadInput /> */}
-
       <form className="mx-auto my-8 flex w-full max-w-xl flex-col gap-0 max-sm:gap-2 sm:flex-row">
         <div className="flex flex-grow flex-col gap-2 sm:flex-row">
           <Input

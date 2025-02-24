@@ -5,6 +5,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import TanstackClientProvider from "@/providers/tanstack-provider"
 
 export default function DashboardLayout({
   children,
@@ -21,8 +22,7 @@ export default function DashboardLayout({
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
           </header>
-
-          {children}
+          <TanstackClientProvider>{children}</TanstackClientProvider>
         </SidebarInset>
       </SidebarProvider>
     </section>
