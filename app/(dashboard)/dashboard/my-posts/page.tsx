@@ -1,5 +1,6 @@
 import { CheckoutButton } from "@/components/dashboard/checkout-button"
 import { DeletePostButton } from "@/components/dashboard/delete-post-button"
+import { SwitchStatusButton } from "@/components/dashboard/switch-status-button"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -79,7 +80,14 @@ const MyPosts = async () => {
                       </Link>
                     </Button>
 
-                    <CheckoutButton postId={post.id} />
+                    {post.status === "DRAFT" ? (
+                      <CheckoutButton postId={post.id} />
+                    ) : (
+                      <SwitchStatusButton
+                        postId={post.id}
+                        postStatus={post.status}
+                      />
+                    )}
 
                     <DeletePostButton postId={post.id} />
                   </div>

@@ -90,4 +90,6 @@ export const postSchema = z.object({
       ? val.slice(0, 3) + " " + val.slice(3)
       : val
   }),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 })

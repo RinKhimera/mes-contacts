@@ -2,14 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
   Form,
   FormControl,
   FormDescription,
@@ -20,11 +12,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
@@ -35,19 +22,19 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { categoriesServices, provinces } from "@/constants"
-import { citiesByProvinces } from "@/hooks"
-import { cn } from "@/lib/utils"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { postSchema } from "@/schemas/post"
 import { createPost, updatePost } from "@/server/actions/post"
+import { MapboxResponse } from "@/types"
 import { useUploadThing } from "@/utils/uploadthing"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { AddressAutofill } from "@mapbox/search-js-react"
 import type { Post } from "@prisma/client"
-import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react"
+import { LoaderCircle } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 import { AspectRatio } from "../ui/aspect-ratio"
@@ -57,21 +44,23 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
 
   const [isPending, startTransition] = useTransition()
 
-  // const [businessNameStatus, setBusinessNameStatus] = useState<
-  //   string | undefined
-  // >("Non")
+  const handleAddressSelect = (address: MapboxResponse) => {
+    const features = address.features[0]
+    console.log(features)
+
+    form.setValue("address", features.properties.full_address)
+    form.setValue("city", features.properties.address_level2)
+    form.setValue("province", features.properties.region_code)
+    form.setValue("postalCode", features.properties.postcode)
+    form.setValue("longitude", features.geometry.coordinates[0])
+    form.setValue("latitude", features.geometry.coordinates[1])
+  }
 
   const [businessImageStatus, setbusinessImageStatus] = useState<
     string | undefined
   >("Non")
 
   const [files, setFiles] = useState<File[]>([])
-
-  // const handleBusinessNameChange = (value: string) => {
-  //   setBusinessNameStatus(value)
-  //   // Reset form fields when radio selection changes
-  //   form.setValue("businessName", undefined)
-  // }
 
   const handleBusinessImageChange = (value: string) => {
     setbusinessImageStatus(value)
@@ -118,6 +107,8 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
       province: post?.province || "",
       city: post?.city || "",
       postalCode: post?.postalCode || "",
+      latitude: post?.latitude || undefined,
+      longitude: post?.longitude || undefined,
     },
   })
 
@@ -140,6 +131,7 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
         } else {
           await createPost(data)
           router.push("/dashboard/my-posts")
+          console.log(data)
           toast.success("La publication a été créée avec succès")
         }
       } catch (error) {
@@ -151,11 +143,6 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
       }
     })
   }
-
-  const provinceValue = useWatch({
-    control: form.control,
-    name: "province",
-  })
 
   return (
     <Form {...form}>
@@ -370,30 +357,65 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
 
         <FormField
           control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Adresse</FormLabel>
+              <FormControl>
+                {/* @ts-expect-error - AddressAutofill component type issues */}
+                <AddressAutofill
+                  accessToken={
+                    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
+                  }
+                  // @ts-expect-error - Mapbox types mismatch
+                  onRetrieve={handleAddressSelect}
+                  options={{
+                    country: "ca",
+                  }}
+                  theme={{
+                    variables: {
+                      fontFamily: "inherit",
+                      fontWeight: "400",
+                      colorBackground: "rgb(24, 32, 48)", // dark blue
+                      colorBackgroundHover: "rgb(17, 24, 39)", // dark gray on hover
+                      colorBackgroundActive: "rgb(31, 41, 55)", // darker gray when active
+                      colorText: "white",
+                    },
+                  }}
+                >
+                  <Input
+                    placeholder="1234 rue Example"
+                    autoComplete="street-address"
+                    {...field}
+                  />
+                </AddressAutofill>
+              </FormControl>
+              <FormDescription>Votre adresse publique.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="province"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Province</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value) // Met à jour la valeur de la province
-                  form.setValue("city", "") // Réinitialise la ville
-                }}
-                defaultValue={field.value}
-              >
-                <FormControl>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez votre province" />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {provinces.map((province) => (
-                    <SelectItem key={province.value} value={province.value}>
-                      {province.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {provinces.map((province, i) => (
+                      <SelectItem key={i} value={province.value}>
+                        {province.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormDescription>Votre province publique.</FormDescription>
               <FormMessage />
             </FormItem>
@@ -406,75 +428,10 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Ville</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild disabled={!provinceValue}>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-full justify-between pl-3 pr-2 font-normal",
-                        !field.value && "text-muted-foreground",
-                      )}
-                    >
-                      {field.value
-                        ? citiesByProvinces(provinceValue).find(
-                            (city) => city.name === field.value,
-                          )?.name
-                        : "Sélectionnez votre ville"}
-                      <ChevronsUpDown className="opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[672px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Rechercher une ville..."
-                      className="h-9"
-                    />
-                    <CommandList>
-                      <CommandEmpty>Aucune entrée trouvée !</CommandEmpty>
-                      <CommandGroup>
-                        {citiesByProvinces(provinceValue).map((city, i) => (
-                          <CommandItem
-                            value={city.name}
-                            key={i}
-                            onSelect={() => {
-                              form.setValue("city", city.name)
-                            }}
-                          >
-                            {city.name}
-                            <Check
-                              className={cn(
-                                "ml-auto",
-                                city.name === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormDescription>Votre ville publique.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
               <FormControl>
-                <Input placeholder="1234 rue Example" {...field} />
+                <Input placeholder="Sherbrooke" {...field} />
               </FormControl>
-              <FormDescription>Votre adresse publique.</FormDescription>
+              <FormDescription>Votre ville publique.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

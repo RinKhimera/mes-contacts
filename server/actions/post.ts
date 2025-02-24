@@ -30,13 +30,18 @@ export const createPost = async (data: z.infer<typeof postSchema>) => {
         province: data.province,
         city: data.city,
         postalCode: data.postalCode,
+        latitude: data.latitude,
+        longitude: data.longitude,
         status: "DRAFT",
       },
     })
-
+    if (!post) {
+      throw new Error("Failed to create post")
+    }
     return post
   } catch (error) {
-    console.error(error)
+    console.error("Error creating post:", error)
+    throw error // Re-throw the error instead of silently returning undefined
   }
 }
 
@@ -117,6 +122,8 @@ export const updatePost = async ({
         province: data.province,
         city: data.city,
         postalCode: data.postalCode,
+        latitude: data.latitude,
+        longitude: data.longitude,
       },
     })
 
@@ -137,5 +144,43 @@ export const deletePost = async (postId: string) => {
     return deletedPost
   } catch (error) {
     console.error(error)
+  }
+}
+
+export const changePostStatus = async (postId: string) => {
+  try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      throw new Error(
+        "Unauthorized. You need to be logged in to change the status of a post.",
+      )
+    }
+
+    const currentPost = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { status: true },
+    })
+
+    if (!currentPost) {
+      throw new Error("Post not found")
+    }
+
+    const newStatus =
+      currentPost.status === "DISABLED" ? "PUBLISHED" : "DISABLED"
+
+    const post = await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        status: newStatus,
+      },
+    })
+
+    return post
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }

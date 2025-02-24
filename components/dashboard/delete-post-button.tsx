@@ -27,7 +27,6 @@ export const DeletePostButton = ({ postId }: { postId: string }) => {
   const handleDeletePost = () => {
     startTransition(async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 3000)) // 3 second delay
         await deletePost(postId)
         setOpen(false)
         router.refresh()
