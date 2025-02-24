@@ -35,13 +35,10 @@ export const createPost = async (data: z.infer<typeof postSchema>) => {
         status: "DRAFT",
       },
     })
-    if (!post) {
-      throw new Error("Failed to create post")
-    }
+
     return post
   } catch (error) {
     console.error("Error creating post:", error)
-    throw error // Re-throw the error instead of silently returning undefined
   }
 }
 

@@ -1,17 +1,16 @@
 "use client"
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { changePostStatus } from "@/server/actions/post"
 import { PostStatus } from "@prisma/client"
 import { LoaderCircle, ToggleLeft, ToggleRight } from "lucide-react"
@@ -53,8 +52,8 @@ export const SwitchStatusButton = ({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         {postStatus === "PUBLISHED" ? (
           <Button
             size={"icon"}
@@ -72,23 +71,27 @@ export const SwitchStatusButton = ({
             <ToggleLeft size={20} />
           </Button>
         )}
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
             {postStatus === "PUBLISHED"
               ? "Désactiver cette annonce ?"
               : "Activer cette annonce ?"}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
+          </DialogTitle>
+          <DialogDescription>
             {postStatus === "PUBLISHED"
               ? "L'annonce ne sera plus visible pour les utilisateurs mais vous pourrez la réactiver plus tard."
               : "L'annonce sera à nouveau visible pour tous les utilisateurs."}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
-          <AlertDialogAction
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Fermer
+            </Button>
+          </DialogClose>
+          <Button
             onClick={(e) => {
               e.preventDefault()
               handleStatusChange()
@@ -103,9 +106,9 @@ export const SwitchStatusButton = ({
             ) : (
               "Activer"
             )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

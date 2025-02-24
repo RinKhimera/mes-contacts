@@ -2,6 +2,14 @@
 
 import { Button } from "@/components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Form,
   FormControl,
   FormDescription,
@@ -24,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { categoriesServices, provinces } from "@/constants"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { postSchema } from "@/schemas/post"
+import { checkoutHandler } from "@/server/actions/checkout"
 import { createPost, updatePost } from "@/server/actions/post"
 import { MapboxResponse } from "@/types"
 import { useUploadThing } from "@/utils/uploadthing"
@@ -43,6 +52,8 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
+  const [open, setOpen] = useState(false)
+  const [postId, setPostId] = useState("")
 
   const handleAddressSelect = (address: MapboxResponse) => {
     const features = address.features[0]
@@ -126,12 +137,21 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
 
         if (post) {
           await updatePost({ postId: post.id, data })
-          router.push("/dashboard/my-posts")
+          if (post.status === "DRAFT") {
+            setOpen(true)
+            setPostId(post.id)
+          } else router.push("/dashboard/my-posts")
+
           toast.success("La publication a été mise à jour avec succès")
         } else {
-          await createPost(data)
-          router.push("/dashboard/my-posts")
-          console.log(data)
+          const newPost = await createPost(data)
+
+          if (newPost) {
+            setPostId(newPost.id)
+            setOpen(true)
+          }
+
+          // router.push("/dashboard/my-posts")
           toast.success("La publication a été créée avec succès")
         }
       } catch (error) {
@@ -144,322 +164,373 @@ export const PostForm = ({ post }: { post: Post | undefined }) => {
     })
   }
 
+  const onCheckout = async () => {
+    startTransition(async () => {
+      try {
+        await checkoutHandler(postId)
+      } catch (error) {
+        console.error(error)
+        toast.error("Une erreur s'est produite !", {
+          description:
+            "Veuillez vérifier votre connexion internet et réessayer. Si le problème persiste, veuillez contacter le support.",
+        })
+      }
+    })
+  }
+
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="mb-4 grid grid-cols-1 gap-4"
-      >
-        <h2 className="text-xl">Informations de votre annonce</h2>
+    <div>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="mb-4 grid grid-cols-1 gap-4"
+        >
+          <h2 className="text-xl">Informations de votre annonce</h2>
 
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Catégorie de votre service</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value)
-                }}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez la catégorie" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categoriesServices.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                La catégorie à laquelle votre entreprise ou activité appartient.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="businessName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom commercial</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Clinique | Restaurant | Garage John Doe"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Ce nom sera affiché publiquement.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {!post ? (
-          <>
-            <Label>
-              Avez-vous une photo ou un logo associé à votre nom commercial ?
-            </Label>
-            <RadioGroup
-              defaultValue={businessImageStatus}
-              onValueChange={handleBusinessImageChange}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Oui" id="yesLogo" />
-                <Label htmlFor="yesLogo">Oui</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Non" id="noLogo" />
-                <Label htmlFor="noLogo">Non</Label>
-              </div>
-            </RadioGroup>
-          </>
-        ) : (
-          <>
-            <div>
-              <FormLabel>
-                Votre photo ou votre logo associé à votre nom commercial
-              </FormLabel>
-              <div className="flex w-[100px] items-center justify-center pt-2">
-                <AspectRatio ratio={1} className="bg-muted">
-                  <Image
-                    src={post.businessImageUrl || postImagePlaceholder}
-                    alt="Business image"
-                    className="rounded-md object-cover"
-                    fill
-                  />
-                </AspectRatio>
-              </div>
-            </div>
-
-            <Label>Modifier votre image actuelle ?</Label>
-            <RadioGroup
-              defaultValue={businessImageStatus}
-              onValueChange={handleBusinessImageChange}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Oui" id="yesLogo" />
-                <Label htmlFor="yesLogo">Oui</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Non" id="noLogo" />
-                <Label htmlFor="noLogo">Non</Label>
-              </div>
-            </RadioGroup>
-          </>
-        )}
-
-        {businessImageStatus === "Oui" && (
           <FormField
             control={form.control}
-            name="businessImageUrl"
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            render={({ field: { value, onChange, ...field } }) => (
+            name="category"
+            render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="picture">
-                  Chargez le logo ou l&apos;image associée
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    id="picture"
-                    type="file"
-                    onChange={handleFileChange}
-                    value={undefined}
-                  />
-                </FormControl>
+                <FormLabel>Catégorie de votre service</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                  }}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez la catégorie" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categoriesServices.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormDescription>
-                  Votre photo ou votre logo associé à votre nom commercial.
+                  La catégorie à laquelle votre entreprise ou activité
+                  appartient.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description du service</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Description de votre entreprise ou activité"
-                  className="min-h-[100px] resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Une description de votre entreprise ou activité.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input placeholder="(555) 555-5555" {...field} />
-              </FormControl>
-              <FormDescription>
-                Votre numéro de téléphone public.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Courriel</FormLabel>
-              <FormControl>
-                <Input placeholder="example@xyz.com" {...field} />
-              </FormControl>
-              <FormDescription>Votre courriel public.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="website"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Site web</FormLabel>
-              <FormControl>
-                <Input placeholder="https://example.com" {...field} />
-              </FormControl>
-              <FormDescription>Votre site web public.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                {/* @ts-expect-error - AddressAutofill component type issues */}
-                <AddressAutofill
-                  accessToken={
-                    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
-                  }
-                  // @ts-expect-error - Mapbox types mismatch
-                  onRetrieve={handleAddressSelect}
-                  options={{
-                    country: "ca",
-                  }}
-                  theme={{
-                    variables: {
-                      fontFamily: "inherit",
-                      fontWeight: "400",
-                      colorBackground: "rgb(24, 32, 48)", // dark blue
-                      colorBackgroundHover: "rgb(17, 24, 39)", // dark gray on hover
-                      colorBackgroundActive: "rgb(31, 41, 55)", // darker gray when active
-                      colorText: "white",
-                    },
-                  }}
-                >
+          <FormField
+            control={form.control}
+            name="businessName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom commercial</FormLabel>
+                <FormControl>
                   <Input
-                    placeholder="1234 rue Example"
-                    autoComplete="street-address"
+                    placeholder="Clinique | Restaurant | Garage John Doe"
                     {...field}
                   />
-                </AddressAutofill>
-              </FormControl>
-              <FormDescription>Votre adresse publique.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </FormControl>
+                <FormDescription>
+                  Ce nom sera affiché publiquement.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="province"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Province</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez votre province" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {provinces.map((province, i) => (
-                      <SelectItem key={i} value={province.value}>
-                        {province.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormDescription>Votre province publique.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ville</FormLabel>
-              <FormControl>
-                <Input placeholder="Sherbrooke" {...field} />
-              </FormControl>
-              <FormDescription>Votre ville publique.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="postalCode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Code postal</FormLabel>
-              <FormControl>
-                <Input placeholder="H0H 0H0" {...field} />
-              </FormControl>
-              <FormDescription>Votre code postal publique.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" disabled={isPending}>
-          {isPending ? (
-            <LoaderCircle className="animate-spin" />
+          {!post ? (
+            <>
+              <Label>
+                Avez-vous une photo ou un logo associé à votre nom commercial ?
+              </Label>
+              <RadioGroup
+                defaultValue={businessImageStatus}
+                onValueChange={handleBusinessImageChange}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Oui" id="yesLogo" />
+                  <Label htmlFor="yesLogo">Oui</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Non" id="noLogo" />
+                  <Label htmlFor="noLogo">Non</Label>
+                </div>
+              </RadioGroup>
+            </>
           ) : (
-            "Enregistrer"
+            <>
+              <div>
+                <FormLabel>
+                  Votre photo ou votre logo associé à votre nom commercial
+                </FormLabel>
+                <div className="flex w-[100px] items-center justify-center pt-2">
+                  <AspectRatio ratio={1} className="bg-muted">
+                    <Image
+                      src={post.businessImageUrl || postImagePlaceholder}
+                      alt="Business image"
+                      className="rounded-md object-cover"
+                      fill
+                    />
+                  </AspectRatio>
+                </div>
+              </div>
+
+              <Label>Modifier votre image actuelle ?</Label>
+              <RadioGroup
+                defaultValue={businessImageStatus}
+                onValueChange={handleBusinessImageChange}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Oui" id="yesLogo" />
+                  <Label htmlFor="yesLogo">Oui</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Non" id="noLogo" />
+                  <Label htmlFor="noLogo">Non</Label>
+                </div>
+              </RadioGroup>
+            </>
           )}
-        </Button>
-      </form>
-    </Form>
+
+          {businessImageStatus === "Oui" && (
+            <FormField
+              control={form.control}
+              name="businessImageUrl"
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel htmlFor="picture">
+                    Chargez le logo ou l&apos;image associée
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="picture"
+                      type="file"
+                      onChange={handleFileChange}
+                      value={undefined}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Votre photo ou votre logo associé à votre nom commercial.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description du service</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Description de votre entreprise ou activité"
+                    className="min-h-[100px] resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Une description de votre entreprise ou activité.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone</FormLabel>
+                <FormControl>
+                  <Input placeholder="(555) 555-5555" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Votre numéro de téléphone public.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Courriel</FormLabel>
+                <FormControl>
+                  <Input placeholder="example@xyz.com" {...field} />
+                </FormControl>
+                <FormDescription>Votre courriel public.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Site web</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://example.com" {...field} />
+                </FormControl>
+                <FormDescription>Votre site web public.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adresse</FormLabel>
+                <FormControl>
+                  {/* @ts-expect-error - AddressAutofill component type issues */}
+                  <AddressAutofill
+                    accessToken={
+                      process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
+                    }
+                    // @ts-expect-error - Mapbox types mismatch
+                    onRetrieve={handleAddressSelect}
+                    options={{
+                      country: "ca",
+                    }}
+                    theme={{
+                      variables: {
+                        fontFamily: "inherit",
+                        fontWeight: "400",
+                        colorBackground: "rgb(24, 32, 48)", // dark blue
+                        colorBackgroundHover: "rgb(17, 24, 39)", // dark gray on hover
+                        colorBackgroundActive: "rgb(31, 41, 55)", // darker gray when active
+                        colorText: "white",
+                      },
+                    }}
+                  >
+                    <Input
+                      placeholder="1234 rue Example"
+                      autoComplete="street-address"
+                      {...field}
+                    />
+                  </AddressAutofill>
+                </FormControl>
+                <FormDescription>Votre adresse publique.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="province"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Province</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {provinces.map((province, i) => (
+                        <SelectItem key={i} value={province.value}>
+                          {province.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormDescription>Votre province publique.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ville</FormLabel>
+                <FormControl>
+                  <Input placeholder="Sherbrooke" {...field} />
+                </FormControl>
+                <FormDescription>Votre ville publique.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="postalCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Code postal</FormLabel>
+                <FormControl>
+                  <Input placeholder="H0H 0H0" {...field} />
+                </FormControl>
+                <FormDescription>Votre code postal publique.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={isPending}>
+            {isPending ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              "Enregistrer"
+            )}
+          </Button>
+        </form>
+      </Form>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalisez la mise en avant de votre post</DialogTitle>
+            <DialogDescription>
+              Votre post a été {post ? "mis à jour" : "crée"} avec succès. Vous
+              avez la possibilité de le promouvoir immédiatement en procédant au
+              paiement dès maintenant ou de le régler ultérieurement.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant={"outline"}
+              onClick={(e) => {
+                e.preventDefault()
+                router.push("/dashboard/my-posts")
+              }}
+              disabled={isPending}
+            >
+              Plus tard
+            </Button>
+            <Button onClick={onCheckout} disabled={isPending}>
+              {isPending ? (
+                <div className="flex items-center">
+                  <LoaderCircle className="mr-1 animate-spin" /> Redirection...
+                </div>
+              ) : (
+                "Payer maintenant"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
