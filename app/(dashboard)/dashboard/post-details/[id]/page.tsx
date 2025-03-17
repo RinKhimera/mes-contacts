@@ -1,3 +1,4 @@
+import { PostLocation } from "@/components/post/post-location"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -31,7 +32,7 @@ const DashboardPostDetails = async ({
     <div className="p-4 pt-0">
       <h1 className="text-4xl font-bold">Infos sur le post</h1>
 
-      <div className="my-4">
+      <div className="my-4 max-w-5xl">
         <div className="w-full max-w-2xl cursor-default border-l-8">
           <Card className="flex border-none p-0 transition-colors max-sm:flex-col sm:items-end">
             <div className="flex w-[180px] items-center justify-center pl-4 max-sm:pt-4">
@@ -50,10 +51,10 @@ const DashboardPostDetails = async ({
             <div className="flex-1 pl-4">
               <div className="flex flex-col space-y-0 pt-4 tracking-tight">
                 <h1 className="text-3xl font-bold">{post.businessName}</h1>
-                <p className="pb-2 text-muted-foreground">
+                <p className="text-muted-foreground pb-2">
                   {`${post.address}, ${post.city} ${post.province} ${post.postalCode}`}
                 </p>
-                <div className="flex flex-col space-y-2 pt-0 sm:flex-row sm:space-x-2 sm:space-y-0">
+                <div className="flex flex-col space-y-2 pt-0 sm:flex-row sm:space-y-0 sm:space-x-2">
                   <Button className="w-full sm:w-auto" asChild>
                     <Link href={`tel:${post.phone}`} target="_blank">
                       <Phone className="mr-2 h-4 w-4" />
@@ -81,23 +82,23 @@ const DashboardPostDetails = async ({
         </div>
 
         <div className="mt-10 grid max-w-4xl grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="">
+          <div>
             <h3 className="text-2xl font-semibold tracking-tight">Catégorie</h3>
             <p>{post.category}</p>
           </div>
 
-          <div className="">
+          <div>
             <h3 className="text-2xl font-semibold tracking-tight">
               Détails et description
             </h3>
             {post.description ? (
               <p>{post.description}</p>
             ) : (
-              <p className="italic text-muted-foreground">Aucune description</p>
+              <p className="text-muted-foreground italic">Aucune description</p>
             )}
           </div>
 
-          <div className="">
+          <div>
             <h3 className="text-2xl font-semibold tracking-tight">
               Localisation
             </h3>
@@ -108,7 +109,7 @@ const DashboardPostDetails = async ({
             </p>
           </div>
 
-          <div className="">
+          <div>
             <h3 className="text-2xl font-semibold tracking-tight">Contacts</h3>
             <TooltipProvider>
               <div className="flex flex-col items-start">
@@ -132,6 +133,18 @@ const DashboardPostDetails = async ({
               </div>
             </TooltipProvider>
           </div>
+          {post.longitude && post.latitude ? (
+            <PostLocation longitude={post.longitude} latitude={post.latitude} />
+          ) : (
+            <div className="col-span-full lg:col-span-2">
+              <h3 className="text-2xl font-semibold tracking-tight">Carte</h3>
+              <div className="bg-muted/20 flex h-[400px] items-center justify-center rounded-md border border-dashed">
+                <p className="text-muted-foreground">
+                  Aucune localisation disponible
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -11,16 +11,16 @@ export default function Home() {
       </h1>
 
       <form className="mx-auto my-8 flex w-full max-w-xl flex-col gap-0 max-sm:gap-2 sm:flex-row">
-        <div className="flex flex-grow flex-col gap-2 sm:flex-row">
+        <div className="flex grow flex-col gap-2 sm:flex-row">
           <Input
             type="text"
             placeholder="Plombier"
-            className="h-11 flex-grow rounded-none"
+            className="h-11 grow rounded-none"
           />
           <Input
             type="text"
             placeholder="Ville | Code postal"
-            className="h-11 flex-grow rounded-none"
+            className="h-11 grow rounded-none"
           />
         </div>
         <Button
