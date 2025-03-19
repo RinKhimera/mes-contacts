@@ -39,7 +39,7 @@ const EditPost = (props: { params: Promise<{ id: string }> }) => {
   return (
     <div className="p-4 pt-0">
       <h1 className="text-4xl font-bold">Modifier une annonce</h1>
-      <p className="mb-10 mt-4 max-w-2xl text-lg text-muted-foreground">
+      <p className="text-muted-foreground mt-4 mb-10 max-w-2xl text-lg">
         Modifiez les informations de votre annonce pour la mettre à jour.
       </p>
 

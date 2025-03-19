@@ -120,6 +120,10 @@ export const data = {
           url: "/dashboard",
         },
         {
+          title: "Recherche",
+          url: "/dashboard/search",
+        },
+        {
           title: "Nouvelle annonce",
           url: "/dashboard/new-post",
         },

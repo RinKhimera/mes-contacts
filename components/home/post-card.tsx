@@ -13,7 +13,7 @@ export const PostCard = async ({ post }: { post: Post }) => {
 
   return (
     <div className="w-full max-w-2xl cursor-default md:ml-5">
-      <Card className="flex bg-muted p-0 transition-colors hover:bg-muted/50 max-sm:flex-col">
+      <Card className="bg-muted hover:bg-muted/50 flex p-0 transition-colors max-sm:flex-col">
         <div className="flex w-[180px] items-center justify-center pl-6 max-sm:pt-4 sm:pl-4">
           <AspectRatio ratio={1} className="bg-muted">
             <Image
@@ -36,13 +36,13 @@ export const PostCard = async ({ post }: { post: Post }) => {
               <h1 className="text-2xl font-bold transition hover:underline">
                 {post.businessName}
               </h1>
-              <p className="pb-2 text-muted-foreground">
+              <p className="text-muted-foreground pb-2">
                 {`${post.address}, ${post.city} ${post.province} ${post.postalCode}`}
               </p>
               <p>{post.description}</p>
             </CardContent>
           </Link>
-          <CardFooter className="flex flex-col space-y-2 pt-0 sm:flex-row sm:space-x-2 sm:space-y-0">
+          <CardFooter className="flex flex-col space-y-2 pt-0 sm:flex-row sm:space-y-0 sm:space-x-2">
             <Button className="w-full sm:w-auto" asChild>
               <Link href={`tel:${post.phone}`} target="_blank">
                 <Phone className="mr-2 h-4 w-4" />

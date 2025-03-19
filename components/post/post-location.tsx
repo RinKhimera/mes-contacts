@@ -29,15 +29,15 @@ export const PostLocation = ({ longitude, latitude }: PostLocationProps) => {
     if (width < 768) {
       // Mobile
       setDimensions({ width: width - 32, height: 400 })
-      setViewState((prev) => ({ ...prev, zoom: 12.5 }))
+      setViewState((prev) => ({ ...prev, zoom: 14 }))
     } else if (width < 1024) {
       // Tablette
       setDimensions({ width: width - 64, height: 500 })
-      setViewState((prev) => ({ ...prev, zoom: 12.8 }))
+      setViewState((prev) => ({ ...prev, zoom: 14 }))
     } else {
       // Desktop
       setDimensions({ width: 600, height: 400 })
-      setViewState((prev) => ({ ...prev, zoom: 13 }))
+      setViewState((prev) => ({ ...prev, zoom: 14 }))
     }
   }
 
@@ -45,7 +45,7 @@ export const PostLocation = ({ longitude, latitude }: PostLocationProps) => {
     return null
   }
 
-  const boundsPadding = 0.05
+  const boundsPadding = 0.08
 
   const maxBounds = [
     longitude - boundsPadding, // West
@@ -65,7 +65,7 @@ export const PostLocation = ({ longitude, latitude }: PostLocationProps) => {
         maxWidth: "100%",
       }}
       minZoom={12}
-      maxZoom={18}
+      maxZoom={20}
       maxBounds={maxBounds}
       dragRotate={false}
       mapStyle="mapbox://styles/mapbox/streets-v12"

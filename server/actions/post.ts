@@ -181,3 +181,142 @@ export const changePostStatus = async (postId: string) => {
     throw error
   }
 }
+
+export const searchPostsByCategories = async (categories: string[]) => {
+  try {
+    if (!categories.length) {
+      return getPosts()
+    }
+
+    const posts = await prisma.post.findMany({
+      where: {
+        category: {
+          in: categories,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return posts
+  } catch (error) {
+    console.error("Error searching posts by categories:", error)
+    return []
+  }
+}
+
+export const searchPosts = async (searchTerm: string) => {
+  try {
+    if (!searchTerm || searchTerm.trim() === "") {
+      return getPosts()
+    }
+
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+
+    const posts = await prisma.post.findMany({
+      where: {
+        OR: [
+          {
+            businessName: {
+              contains: normalizedSearchTerm,
+              mode: "insensitive",
+            },
+          },
+          {
+            city: {
+              contains: normalizedSearchTerm,
+              mode: "insensitive",
+            },
+          },
+          {
+            province: {
+              contains: normalizedSearchTerm,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return posts
+  } catch (error) {
+    console.error("Error searching posts:", error)
+    return []
+  }
+}
+
+export const searchPostsCombined = async (
+  searchTerm: string,
+  categories: string[],
+) => {
+  try {
+    // Si aucun filtre, retourner tous les posts
+    if (
+      (!searchTerm || searchTerm.trim() === "") &&
+      (!categories || categories.length === 0)
+    ) {
+      return getPosts()
+    }
+
+    // Construction de la condition WHERE correcte pour Prisma
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let whereCondition: any = {}
+
+    // 1. Cas où on a SEULEMENT un terme de recherche
+    if (
+      searchTerm &&
+      searchTerm.trim() !== "" &&
+      (!categories || categories.length === 0)
+    ) {
+      const term = searchTerm.trim().toLowerCase()
+      whereCondition = {
+        OR: [
+          { businessName: { contains: term, mode: "insensitive" } },
+          { city: { contains: term, mode: "insensitive" } },
+          { province: { contains: term, mode: "insensitive" } },
+        ],
+      }
+    }
+    // 2. Cas où on a SEULEMENT des catégories
+    else if (
+      (!searchTerm || searchTerm.trim() === "") &&
+      categories &&
+      categories.length > 0
+    ) {
+      whereCondition = {
+        category: { in: categories },
+      }
+    }
+    // 3. Cas où on a LES DEUX (terme + catégories)
+    else {
+      const term = searchTerm.trim().toLowerCase()
+      whereCondition = {
+        AND: [
+          {
+            OR: [
+              { businessName: { contains: term, mode: "insensitive" } },
+              { city: { contains: term, mode: "insensitive" } },
+              { province: { contains: term, mode: "insensitive" } },
+            ],
+          },
+          { category: { in: categories } },
+        ],
+      }
+    }
+
+    // Exécuter la requête
+    const posts = await prisma.post.findMany({
+      where: whereCondition,
+      orderBy: { createdAt: "desc" },
+    })
+
+    return posts
+  } catch (error) {
+    console.error("Error searching posts combined:", error)
+    return []
+  }
+}

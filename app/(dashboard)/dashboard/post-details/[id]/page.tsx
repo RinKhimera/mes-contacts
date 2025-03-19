@@ -2,12 +2,6 @@ import { PostLocation } from "@/components/post/post-location"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { getPostById } from "@/server/actions/post"
 // import { clerkClient } from "@clerk/nextjs/server"
@@ -111,33 +105,24 @@ const DashboardPostDetails = async ({
 
           <div>
             <h3 className="text-2xl font-semibold tracking-tight">Contacts</h3>
-            <TooltipProvider>
-              <div className="flex flex-col items-start">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="w-full text-left">Téléphone</button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>{post.phone}</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="w-full text-left">Courriel</button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>{post.email}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
+            <p>
+              {post.phone} <br />
+              {post.email} <br />
+              {post.website && (
+                <Link
+                  href={post.website}
+                  target="_blank"
+                  className="hover:underline"
+                >
+                  {post.website}
+                </Link>
+              )}
+            </p>
           </div>
           {post.longitude && post.latitude ? (
             <PostLocation longitude={post.longitude} latitude={post.latitude} />
           ) : (
             <div className="col-span-full lg:col-span-2">
-              <h3 className="text-2xl font-semibold tracking-tight">Carte</h3>
               <div className="bg-muted/20 flex h-[400px] items-center justify-center rounded-md border border-dashed">
                 <p className="text-muted-foreground">
                   Aucune localisation disponible

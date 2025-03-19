@@ -1,4 +1,5 @@
 import { FirstDashboardCard } from "@/components/dashboard/first-dashboard-card"
+import { MainDashboardCard } from "@/components/dashboard/main-dashboard-card"
 import { SecondDashboardCard } from "@/components/dashboard/second-dashboard-card"
 
 export default function Dashboard() {
@@ -9,7 +10,7 @@ export default function Dashboard() {
         <SecondDashboardCard />
         <div className="bg-muted/50 aspect-video rounded-xl" />
       </div>
-      <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+      <MainDashboardCard />
     </div>
   )
 }
