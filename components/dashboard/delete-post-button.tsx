@@ -18,7 +18,17 @@ import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
-export const DeletePostButton = ({ postId }: { postId: string }) => {
+type DeletePostButtonProps = {
+  postId: string
+  variant?: "button" | "menu"
+  onActionComplete?: () => void
+}
+
+export const DeletePostButton = ({
+  postId,
+  variant = "button",
+  onActionComplete,
+}: DeletePostButtonProps) => {
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
 
@@ -39,6 +49,47 @@ export const DeletePostButton = ({ postId }: { postId: string }) => {
         })
       }
     })
+    if (onActionComplete) onActionComplete()
+  }
+
+  if (variant === "menu") {
+    return (
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogTrigger asChild>
+          <div className="flex items-center gap-2">
+            <Trash2 size={20} />
+            <span>Supprimer</span>
+          </div>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Vous êtes sur le point de supprimer votre annonce
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible et toute souscription liée à cette
+              annonce sera annulée. Êtes-vous sûr de vouloir continuer ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                handleDeletePost()
+              }}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                "Supprimer"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    )
   }
 
   return (

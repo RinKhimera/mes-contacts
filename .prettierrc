@@ -1,4 +1,25 @@
 {
-  "plugins": ["prettier-plugin-tailwindcss"],
-  "semi": false
+  "tailwindStylesheet": "./app/globals.css",
+  "plugins": [
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  "semi": false,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "importOrder": [
+    "<THIRD_PARTY_MODULES>",
+    "interface",
+    "(?=content|api)",
+    "context/",
+    "mock/",
+    "config",
+    "utils/",
+    "hooks/",
+    "(components/|./index)",
+    ".svg",
+    "^../(.*)$",
+    "(?=./styles.module.scss)"
+  ]
 }

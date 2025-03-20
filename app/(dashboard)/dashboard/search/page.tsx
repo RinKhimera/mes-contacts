@@ -1,39 +1,34 @@
 "use client"
 
+import { DataTablePagination } from "@/components/dashboard/pagination"
+import { PostCard } from "@/components/post/post-card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Search,
-  Filter,
-  MapPin,
-  Phone,
-  Star,
-  ChevronDown,
-  ListFilter,
-  Map as MapIcon,
-  LoaderCircle,
-  X,
-} from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { getPosts, searchPostsCombined } from "@/server/actions/post"
-import Image from "next/image"
-import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { categoriesServices } from "@/constants"
-import { useQuery } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { getPosts, searchPostsCombined } from "@/server/actions/post"
 import { Post } from "@prisma/client"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import Link from "next/link"
+import { useQuery } from "@tanstack/react-query"
 import {
-  useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
   PaginationState,
+  useReactTable,
 } from "@tanstack/react-table"
-import { DataTablePagination } from "@/components/dashboard/pagination"
+import {
+  ChevronDown,
+  Filter,
+  ListFilter,
+  LoaderCircle,
+  Map as MapIcon,
+  Search,
+  Star,
+  X,
+} from "lucide-react"
+import { useEffect, useState } from "react"
 
 const SearchPage = () => {
   const [posts, setPosts] = useState<Post[]>([])
@@ -79,8 +74,6 @@ const SearchPage = () => {
     enabled: false, // Active manuellement sur demande
   })
 
-  // État de chargement combiné
-  // const isLoading = isLoadingAllPosts || isLoadingFiltered || isLoadingSearch
   // État de chargement combiné
   const isLoading = isLoadingAllPosts || isLoadingCombined
 
@@ -343,80 +336,7 @@ const SearchPage = () => {
                   ) : (
                     <div className="grid grid-cols-1 gap-4 @[700px]:grid-cols-2 @[1500px]:grid-cols-3">
                       {paginatedPosts.map((post) => (
-                        <Link
-                          key={post.id}
-                          href={`/dashboard/post-details/${post.id}`}
-                        >
-                          <Card className="hover:bg-muted/80 flex h-[140px] flex-row overflow-hidden transition">
-                            <div className="bg-muted h-full w-[140px] shrink-0">
-                              <Image
-                                src={
-                                  post.businessImageUrl || postImagePlaceholder
-                                }
-                                alt={post.businessName || "Entreprise"}
-                                width={140}
-                                height={140}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-
-                            <CardContent className="flex-1 overflow-hidden p-4 pt-1">
-                              <div className="flex h-full flex-col justify-between">
-                                <div>
-                                  <div className="mb-1 flex items-center justify-between">
-                                    <h3 className="line-clamp-1 font-semibold">
-                                      {post.businessName}
-                                    </h3>
-
-                                    <div className="flex items-center">
-                                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                      <span className="ml-1 text-xs font-medium">
-                                        5
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  <Badge className="mb-2 inline-flex w-fit max-w-[95%]">
-                                    <span className="truncate">
-                                      {post.category || "Non catégorisé"}
-                                    </span>
-                                  </Badge>
-
-                                  {post.description ? (
-                                    <p className="text-muted-foreground line-clamp-2 text-sm">
-                                      {post.description}
-                                    </p>
-                                  ) : (
-                                    <p className="text-muted-foreground line-clamp-2 text-sm italic">
-                                      Aucune description
-                                    </p>
-                                  )}
-                                </div>
-
-                                <div className="text-muted-foreground mt-1 flex items-center justify-between text-xs">
-                                  {(post.city || post.province) && (
-                                    <div className="flex max-w-[60%] items-center gap-1">
-                                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                                      <span className="truncate">
-                                        {post.city}
-                                        {post.city && post.province ? ", " : ""}
-                                        {post.province}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {post.phone && (
-                                    <div className="ml-auto flex max-w-[40%] items-center gap-1">
-                                      <Phone className="h-3 w-3 flex-shrink-0" />
-                                      <span className="truncate">
-                                        {post.phone}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </Link>
+                        <PostCard key={post.id} post={post} />
                       ))}
                     </div>
                   )}

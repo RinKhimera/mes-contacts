@@ -1,7 +1,9 @@
 import { HomePosts } from "@/components/home/home-posts"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
+import { LoaderCircle, Search } from "lucide-react"
+import { Suspense } from "react"
 
 export default function Home() {
   return (
@@ -32,7 +34,24 @@ export default function Home() {
         </Button>
       </form>
 
-      <HomePosts />
+      <Suspense fallback={<FallbackLoader />}>
+        <HomePosts />
+      </Suspense>
+    </div>
+  )
+}
+
+const FallbackLoader = () => {
+  return (
+    <div>
+      <h1 className="text-2xl font-semibold lg:text-3xl">Annonces récentes</h1>
+      <Card className="my-4">
+        <CardContent className="py-4">
+          <div className="flex h-[50vh] items-center justify-center">
+            <LoaderCircle className="animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

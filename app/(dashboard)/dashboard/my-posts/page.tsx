@@ -1,6 +1,4 @@
-import { CheckoutButton } from "@/components/dashboard/checkout-button"
-import { DeletePostButton } from "@/components/dashboard/delete-post-button"
-import { SwitchStatusButton } from "@/components/dashboard/switch-status-button"
+import { PostActions } from "@/components/dashboard/post-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +13,6 @@ import {
 import { getUserPosts } from "@/server/actions/post"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Eye, Pencil } from "lucide-react"
 import Link from "next/link"
 
 const MyPosts = async () => {
@@ -29,11 +26,11 @@ const MyPosts = async () => {
         <TableCaption>Liste de vos annonces</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="">Catégorie</TableHead>
-            <TableHead className="">Nom de l&apos;annonce</TableHead>
-            <TableHead className="">Date de création</TableHead>
-            <TableHead className="">Statut</TableHead>
-            <TableHead className="">Actions</TableHead>
+            <TableHead>Catégorie</TableHead>
+            <TableHead>Nom de l&apos;annonce</TableHead>
+            <TableHead>Date de création</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -41,63 +38,40 @@ const MyPosts = async () => {
             userPosts.map((post) => (
               <TableRow key={post.id}>
                 <TableCell className="font-medium">{post.category}</TableCell>
+
                 <TableCell>{post.businessName}</TableCell>
+
                 <TableCell>
                   {format(post.createdAt, "P", { locale: fr })}
                 </TableCell>
-                <TableCell>
+
+                <TableCell className="min-w-[100px] whitespace-nowrap">
                   {post.status === "PUBLISHED" && (
-                    <div className="">
-                      <Badge variant={"published"}>En ligne</Badge>
-                    </div>
+                    <Badge variant={"published"} className="whitespace-nowrap">
+                      En ligne
+                    </Badge>
                   )}
                   {post.status === "DRAFT" && (
-                    <div className="">
-                      <Badge variant={"draft"}>En attente</Badge>
-                    </div>
+                    <Badge variant={"draft"} className="whitespace-nowrap">
+                      En attente
+                    </Badge>
                   )}
                   {post.status === "DISABLED" && (
-                    <div className="">
-                      <Badge variant={"disabled"}>Désactivé</Badge>
-                    </div>
+                    <Badge variant={"disabled"} className="whitespace-nowrap">
+                      Désactivé
+                    </Badge>
                   )}
                 </TableCell>
+
                 <TableCell>
-                  <div className="space-x-2">
-                    <Button size={"icon"} variant={"outline"} asChild>
-                      <Link href={`/dashboard/post-details/${post.id}`}>
-                        <Eye size={20} />
-                      </Link>
-                    </Button>
-
-                    <Button
-                      size={"icon"}
-                      variant={"outline"}
-                      className="hover:bg-blue-600"
-                    >
-                      <Link href={`/dashboard/edit-post/${post.id}`}>
-                        <Pencil size={20} />
-                      </Link>
-                    </Button>
-
-                    {post.status === "DRAFT" ? (
-                      <CheckoutButton postId={post.id} />
-                    ) : (
-                      <SwitchStatusButton
-                        postId={post.id}
-                        postStatus={post.status}
-                      />
-                    )}
-
-                    <DeletePostButton postId={post.id} />
-                  </div>
+                  <PostActions postId={post.id} postStatus={post.status} />
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
               <TableCell colSpan={5} className="space-y-5 text-center">
-                <p className="italic text-muted-foreground">
+                <p className="text-muted-foreground italic">
                   Vous n&apos;avez pas encore publié d&apos;annonce !
                 </p>
                 <Button variant={"secondary"} asChild>

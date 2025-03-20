@@ -16,7 +16,17 @@ import { LoaderCircle, ShoppingCart } from "lucide-react"
 import { useTransition } from "react"
 import { toast } from "sonner"
 
-export const CheckoutButton = ({ postId }: { postId: string }) => {
+type CheckoutButtonProps = {
+  postId: string
+  variant?: "button" | "menu"
+  onActionComplete?: () => void
+}
+
+export const CheckoutButton = ({
+  postId,
+  variant = "button",
+  onActionComplete,
+}: CheckoutButtonProps) => {
   const [isPending, startTransition] = useTransition()
 
   const onCheckout = async () => {
@@ -31,6 +41,50 @@ export const CheckoutButton = ({ postId }: { postId: string }) => {
         })
       }
     })
+    if (onActionComplete) onActionComplete()
+  }
+
+  if (variant === "menu") {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <div className="flex items-center gap-2">
+            <ShoppingCart size={20} />
+            <span>Souscrire</span>
+          </div>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalisez la mise en avant de votre post</DialogTitle>
+            <DialogDescription>
+              En cliquant sur{" "}
+              <span className="font-semibold">
+                &quot;Payer maintenant&quot;
+              </span>
+              , vous serez redirigé vers notre plateforme de paiement sécurisée
+              pour finaliser la transaction.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Fermer
+              </Button>
+            </DialogClose>
+
+            <Button onClick={onCheckout} disabled={isPending}>
+              {isPending ? (
+                <div className="flex items-center">
+                  <LoaderCircle className="mr-1 animate-spin" /> Redirection...
+                </div>
+              ) : (
+                "Payer maintenant"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
   }
 
   return (
