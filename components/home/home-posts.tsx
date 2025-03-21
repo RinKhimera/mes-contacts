@@ -2,10 +2,7 @@ import { getPosts } from "@/server/actions/post"
 import { PostCard } from "../post/post-card"
 import { Card, CardContent } from "../ui/card"
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 export const HomePosts = async () => {
-  await delay(5000)
-
   const posts = await getPosts()
 
   return (

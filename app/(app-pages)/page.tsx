@@ -2,10 +2,15 @@ import { HomePosts } from "@/components/home/home-posts"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { auth } from "@clerk/nextjs/server"
 import { LoaderCircle, Search } from "lucide-react"
+import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth()
+  if (userId) redirect("/dashboard")
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
       <h1 className="mx-auto mt-10 max-w-xl text-center text-2xl font-bold lg:text-3xl">

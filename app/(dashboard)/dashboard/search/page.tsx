@@ -142,7 +142,7 @@ const SearchPage = () => {
       <h1 className="text-4xl font-bold">Recherche</h1>
 
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="relative mt-4 mb-8 max-w-xl">
+      <form onSubmit={handleSearch} className="relative my-4 max-w-xl">
         <Input
           type="search"
           placeholder="Rechercher par nom ou ville..."
@@ -150,7 +150,7 @@ const SearchPage = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform" />
+        <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
 
         {searchTerm && (
           <Button
@@ -183,7 +183,7 @@ const SearchPage = () => {
         <div className="flex flex-col gap-4 @[900px]:flex-row">
           {/* Filters Sidebar */}
           <div className="w-full shrink-0 @[900px]:sticky @[900px]:top-4 @[900px]:w-64">
-            <div className="bg-card rounded-lg border p-4 shadow-sm">
+            <div className="rounded-lg border bg-card p-4 shadow-sm">
               <div className="mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -208,7 +208,7 @@ const SearchPage = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground mt-2 h-8 w-full border border-dashed px-2 text-xs"
+                    className="mt-2 h-8 w-full border border-dashed px-2 text-xs text-muted-foreground"
                     onClick={async () => {
                       setSelectedCategories([])
                       setSearchTerm("")
@@ -300,8 +300,8 @@ const SearchPage = () => {
           <div className="flex h-[calc(100vh-220px)] flex-1 flex-col">
             {/* Results Controls */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <div className="text-muted-foreground text-sm">
-                <span className="text-foreground font-medium">
+              <div className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">
                   {isLoading ? "..." : posts.length}
                 </span>{" "}
                 résultats trouvés

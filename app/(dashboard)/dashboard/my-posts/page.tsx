@@ -15,7 +15,11 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import Link from "next/link"
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 const MyPosts = async () => {
+  await delay(5000)
+
   const userPosts = await getUserPosts()
 
   return (

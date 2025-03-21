@@ -22,9 +22,9 @@ export async function DashboardSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/dashboard">
                 <div className="flex items-center gap-2">
-                  <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                     <GalleryVerticalEnd className="size-4" />
                   </div>
                   <div className="-mt-2 text-3xl font-bold">mc.ca</div>
