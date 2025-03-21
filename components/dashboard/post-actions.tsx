@@ -57,27 +57,32 @@ export function PostActions({ postId, postStatus }: PostActionsProps) {
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-32">
             <DropdownMenuItem asChild>
               <Link
                 href={`/dashboard/post-details/${postId}`}
-                className="flex cursor-pointer items-center gap-2"
+                className="flex w-full cursor-pointer items-center gap-3"
               >
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4 flex-shrink-0" />
                 <span>Voir</span>
               </Link>
             </DropdownMenuItem>
+
             <DropdownMenuItem asChild>
               <Link
                 href={`/dashboard/edit-post/${postId}`}
-                className="flex cursor-pointer items-center gap-2"
+                className="flex w-full cursor-pointer items-center gap-3"
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-4 w-4 flex-shrink-0" />
                 <span>Modifier</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <div className="w-full" onClick={handleItemClick}>
+
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()} asChild>
+              <div
+                className="flex w-full cursor-pointer items-center gap-3"
+                onClick={handleItemClick}
+              >
                 {postStatus === "DRAFT" ? (
                   <CheckoutButton
                     key={`checkout-${key}`}
@@ -96,11 +101,12 @@ export function PostActions({ postId, postStatus }: PostActionsProps) {
                 )}
               </div>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer hover:bg-primary"
-              onSelect={(e) => e.preventDefault()}
-            >
-              <div className="w-full" onClick={handleItemClick}>
+
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()} asChild>
+              <div
+                className="flex w-full cursor-pointer items-center gap-3 focus:bg-primary focus:text-primary-foreground"
+                onClick={handleItemClick}
+              >
                 <DeletePostButton
                   key={`delete-${key}`}
                   postId={postId}
