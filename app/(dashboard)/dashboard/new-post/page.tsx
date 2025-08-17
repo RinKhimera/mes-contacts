@@ -1,4 +1,10 @@
-import PostForm from "@/components/post/post-form"
+"use client"
+
+import dynamic from "next/dynamic"
+
+const PostFormWithNoSSR = dynamic(() => import("@/components/post/post-form"), {
+  ssr: false,
+})
 
 const NewPost = () => {
   return (
@@ -9,7 +15,7 @@ const NewPost = () => {
         vos services ou vos offres spéciales. C&apos;est rapide et facile !
       </p>
 
-      <PostForm />
+      <PostFormWithNoSSR />
     </div>
   )
 }

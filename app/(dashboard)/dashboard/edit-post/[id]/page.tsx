@@ -1,12 +1,16 @@
 "use client"
 
-import PostForm from "@/components/post/post-form"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
 import { useQuery } from "convex/react"
 import { LoaderCircle } from "lucide-react"
+import dynamic from "next/dynamic"
 import { notFound } from "next/navigation"
 import { use } from "react"
+
+const PostFormWithNoSSR = dynamic(() => import("@/components/post/post-form"), {
+  ssr: false,
+})
 
 const EditPost = (props: { params: Promise<{ id: Id<"posts"> }> }) => {
   const params = use(props.params)
@@ -33,7 +37,7 @@ const EditPost = (props: { params: Promise<{ id: Id<"posts"> }> }) => {
         Modifiez les informations de votre annonce pour la mettre à jour.
       </p>
 
-      <PostForm post={post} />
+      <PostFormWithNoSSR post={post} />
     </div>
   )
 }
