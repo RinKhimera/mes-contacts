@@ -1,15 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
 
 const isProtectedRoute = createRouteMatcher([
-  "/post",
-  "/my-profile(.*)",
   "/dashboard(.*)",
   "/account(.*)",
   "/payment-status(.*)",
-  // "/contact-us(.*)",
 ])
 
+const isPublicRoute = createRouteMatcher(["/"])
+
 export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth()
+
+  // Si l'utilisateur est connecté et tente d'accéder aux pages vitrine
+  if (userId && isPublicRoute(req)) {
+    return NextResponse.redirect(new URL("/dashboard", req.url))
+  }
+
   if (isProtectedRoute(req)) await auth.protect()
 })
 

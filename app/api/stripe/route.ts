@@ -1,6 +1,10 @@
-import { prisma } from "@/lib/prisma"
+import { api } from "@/convex/_generated/api"
+import { Id } from "@/convex/_generated/dataModel"
 import { stripe } from "@/lib/stripe"
+import { ConvexHttpClient } from "convex/browser"
 import Stripe from "stripe"
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function POST(request: Request) {
   let event: Stripe.Event
@@ -26,16 +30,15 @@ export async function POST(request: Request) {
   switch (event.type) {
     case "checkout.session.completed":
       const session = event.data.object as Stripe.Checkout.Session
-      const postId = session.metadata?.postId
+      const postId = session.metadata?.postId as Id<"posts">
 
-      await prisma.post.update({
-        where: {
-          id: postId,
-        },
-        data: {
-          status: "PUBLISHED",
-        },
-      })
+      if (postId) {
+        try {
+          await convex.mutation(api.posts.changePostStatus, { postId })
+        } catch (error) {
+          console.error("Erreur lors de la mise à jour du post:", error)
+        }
+      }
 
       break
     default:

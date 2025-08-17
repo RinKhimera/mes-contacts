@@ -11,13 +11,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Id } from "@/convex/_generated/dataModel"
 import { checkoutHandler } from "@/server/actions/checkout"
 import { LoaderCircle, ShoppingCart } from "lucide-react"
 import { useTransition } from "react"
 import { toast } from "sonner"
 
 type CheckoutButtonProps = {
-  postId: string
+  postId: Id<"posts">
   variant?: "button" | "menu"
   onActionComplete?: () => void
 }

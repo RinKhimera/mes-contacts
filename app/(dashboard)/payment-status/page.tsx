@@ -1,7 +1,5 @@
-import { AvatarDropdown } from "@/components/shared/avatar-dropdown"
 import { buttonVariants } from "@/components/ui/button"
 import { stripe } from "@/lib/stripe"
-import { auth, currentUser } from "@clerk/nextjs/server"
 import { CircleCheck, CircleX } from "lucide-react"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
@@ -15,9 +13,6 @@ const PaymentStatus = async (props: { searchParams: SearchParams }) => {
   const isCanceled = searchParams.canceled === "true"
 
   if (!sessionId && !isCanceled) notFound()
-
-  const { userId } = await auth()
-  const user = await currentUser()
 
   let isSuccess = false
 
@@ -40,18 +35,8 @@ const PaymentStatus = async (props: { searchParams: SearchParams }) => {
 
   return (
     <div className="mx-auto h-screen w-full max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
-      <div className="flex justify-between pt-4">
-        <Link
-          href="/"
-          className="-mt-1 text-3xl font-bold text-accent-foreground"
-        >
-          mc.ca
-        </Link>
-
-        {userId && <AvatarDropdown user={user} />}
-      </div>
       {isSuccess && (
-        <div className="flex h-[calc(100vh-80px)] flex-col items-center justify-center p-8">
+        <div className="flex h-full flex-col items-center justify-center p-8">
           <div className="flex flex-col items-center gap-4 text-center">
             <CircleCheck size={100} />
             <h1 className="text-4xl font-semibold md:text-6xl">Merci !</h1>
@@ -61,7 +46,7 @@ const PaymentStatus = async (props: { searchParams: SearchParams }) => {
             </p>
             <Link
               className={buttonVariants({ variant: "secondary" })}
-              href={"/dashboard"}
+              href={"/dashboard/my-posts"}
             >
               Retourner au tableau de bord
             </Link>
@@ -70,7 +55,7 @@ const PaymentStatus = async (props: { searchParams: SearchParams }) => {
       )}
 
       {isCanceled && (
-        <div className="flex h-[calc(100vh-80px)] flex-col items-center justify-center p-8">
+        <div className="flex h-full flex-col items-center justify-center p-8">
           <div className="flex flex-col items-center gap-4 text-center">
             <CircleX size={100} className="text-red-500" />
             <h1 className="text-4xl font-semibold md:text-6xl">

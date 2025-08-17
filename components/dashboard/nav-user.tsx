@@ -1,3 +1,5 @@
+"use client"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -13,9 +15,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { SignOutButton } from "@clerk/nextjs"
-import { currentUser } from "@clerk/nextjs/server"
 import {
   BadgeCheck,
   Bell,
@@ -25,13 +26,37 @@ import {
   Sparkles,
 } from "lucide-react"
 import Link from "next/link"
-import React from "react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
-export const NavUser = async () => {
-  const user = await currentUser()
+export const NavUser = () => {
+  const router = useRouter()
+  const { currentUser, isLoading } = useCurrentUser()
 
-  if (!user) {
-    return <NavUserSkeleton />
+  // Redirection automatique si pas d'utilisateur connecté
+  useEffect(() => {
+    if (!isLoading && currentUser === null) {
+      router.push("/")
+    }
+  }, [currentUser, isLoading, router])
+
+  if (isLoading || currentUser === undefined) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+          <div className="text-center">
+            <h2 className="text-lg font-semibold">Chargement...</h2>
+            <p className="text-sm text-muted-foreground">Connexion en cours</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Si pas d'utilisateur, ne rien afficher (redirection en cours)
+  if (currentUser === null) {
+    return null
   }
 
   return (
@@ -45,18 +70,16 @@ export const NavUser = async () => {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={user.imageUrl}
-                  alt={user.firstName || "user avatar"}
+                  src={currentUser.image}
+                  alt={currentUser.name || "user avatar"}
                 />
                 <AvatarFallback className="rounded-lg">XO</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {user.firstName} {user.lastName}
+                  {currentUser.name}
                 </span>
-                <span className="truncate text-xs">
-                  {user?.emailAddresses[0].emailAddress}
-                </span>
+                <span className="truncate text-xs">{currentUser.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -71,18 +94,16 @@ export const NavUser = async () => {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user.imageUrl}
-                    alt={user.firstName || "user avatar"}
+                    src={currentUser.image}
+                    alt={currentUser.name || "user avatar"}
                   />
                   <AvatarFallback className="rounded-lg">XO</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {user.firstName} {user.lastName}
+                    {currentUser.name}
                   </span>
-                  <span className="truncate text-xs">
-                    {user?.emailAddresses[0].emailAddress}
-                  </span>
+                  <span className="truncate text-xs">{currentUser.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -121,25 +142,5 @@ export const NavUser = async () => {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
-}
-
-const NavUserSkeleton = () => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <SidebarMenuButton
-          size="lg"
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-        >
-          <Skeleton className="size-8 rounded-lg bg-muted" />
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-[100px] bg-muted" />
-            <Skeleton className="h-3 w-[150px] bg-muted" />
-          </div>
-          <ChevronsUpDown className="ml-auto size-4" />
-        </SidebarMenuButton>
-      </DropdownMenuTrigger>
-    </DropdownMenu>
   )
 }
