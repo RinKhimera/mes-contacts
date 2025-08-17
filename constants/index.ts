@@ -131,10 +131,10 @@ export const data = {
           title: "Mes annonces",
           url: "/dashboard/my-posts",
         },
-        {
-          title: "Mes favoris",
-          url: "#",
-        },
+        // {
+        //   title: "Mes favoris",
+        //   url: "#",
+        // },
       ],
     },
     {

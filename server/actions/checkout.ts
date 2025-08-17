@@ -1,5 +1,6 @@
 "use server"
 
+import { Id } from "@/convex/_generated/dataModel"
 import { stripe } from "@/lib/stripe"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
@@ -9,7 +10,7 @@ const baseUrl =
     ? "https://mes-contacts.vercel.app"
     : "http://localhost:3000"
 
-export const checkoutHandler = async (postId: string) => {
+export const checkoutHandler = async (postId: Id<"posts">) => {
   const { userId } = await auth()
   const user = await currentUser()
 

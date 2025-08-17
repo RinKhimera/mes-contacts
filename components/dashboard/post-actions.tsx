@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Id } from "@/convex/_generated/dataModel"
 import { Eye, MoreHorizontal, Pencil } from "lucide-react"
 import Link from "next/link"
 import { useRef, useState } from "react"
@@ -15,7 +16,7 @@ import { DeletePostButton } from "./delete-post-button"
 import { SwitchStatusButton } from "./switch-status-button"
 
 interface PostActionsProps {
-  postId: string
+  postId: Id<"posts">
   postStatus: string
 }
 

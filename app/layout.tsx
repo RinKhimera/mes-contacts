@@ -2,9 +2,7 @@ import { ourFileRouter } from "@/app/api/uploadthing/core"
 import "@/app/globals.css"
 import { ThemeProvider } from "@/components/shared/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
-import { frFR } from "@clerk/localizations"
-import { ClerkProvider } from "@clerk/nextjs"
-import { dark } from "@clerk/themes"
+import ConvexClientProvider from "@/providers/convex-client-provider"
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
@@ -31,28 +29,23 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider
-      localization={frFR}
-      appearance={{
-        baseTheme: dark,
-      }}
-    >
-      <html lang="fr" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} className="flex justify-center" min-h-screen items-center antialiased`}
+    <html lang="fr" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} className="flex justify-center" min-h-screen items-center antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ConvexClientProvider>
             <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
             {children}
-          </ThemeProvider>
-          <Toaster richColors />
-        </body>
-      </html>
-    </ClerkProvider>
+          </ConvexClientProvider>
+        </ThemeProvider>
+        <Toaster richColors />
+      </body>
+    </html>
   )
 }

@@ -30,15 +30,16 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { categoriesServices, provinces } from "@/constants"
+import { api } from "@/convex/_generated/api"
+import { Doc, Id } from "@/convex/_generated/dataModel"
 import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { postSchema } from "@/schemas/post"
 import { checkoutHandler } from "@/server/actions/checkout"
-import { createPost, updatePost } from "@/server/actions/post"
 import { MapboxResponse } from "@/types"
 import { useUploadThing } from "@/utils/uploadthing"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AddressAutofill } from "@mapbox/search-js-react"
-import type { Post } from "@prisma/client"
+import { useMutation } from "convex/react"
 import { LoaderCircle } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -48,12 +49,16 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { AspectRatio } from "../ui/aspect-ratio"
 
-const PostForm = ({ post }: { post: Post | undefined }) => {
+const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
-  const [postId, setPostId] = useState("")
+  const [postId, setPostId] = useState<Id<"posts">>()
+
+  // Convex mutations
+  const createPost = useMutation(api.posts.createPost)
+  const updatePost = useMutation(api.posts.updatePost)
 
   const handleAddressSelect = (address: MapboxResponse) => {
     const features = address.features[0]
@@ -118,8 +123,8 @@ const PostForm = ({ post }: { post: Post | undefined }) => {
       province: post?.province || "",
       city: post?.city || "",
       postalCode: post?.postalCode || "",
-      latitude: post?.latitude || undefined,
-      longitude: post?.longitude || undefined,
+      latitude: post?.geo?.latitude || undefined,
+      longitude: post?.geo?.longitude || undefined,
     },
   })
 
@@ -136,18 +141,47 @@ const PostForm = ({ post }: { post: Post | undefined }) => {
         }
 
         if (post) {
-          await updatePost({ postId: post.id, data })
+          await updatePost({
+            postId: post._id,
+            businessName: data.businessName,
+            businessImageUrl: data.businessImageUrl,
+            category: data.category,
+            description: data.description,
+            phone: data.phone,
+            email: data.email,
+            website: data.website,
+            address: data.address,
+            city: data.city,
+            province: data.province,
+            postalCode: data.postalCode,
+            longitude: data.longitude,
+            latitude: data.latitude,
+          })
           if (post.status === "DRAFT") {
             setOpen(true)
-            setPostId(post.id)
+            setPostId(post._id)
           } else router.push("/dashboard/my-posts")
 
           toast.success("La publication a été mise à jour avec succès")
         } else {
-          const newPost = await createPost(data)
+          const newPostId = await createPost({
+            businessName: data.businessName,
+            businessImageUrl: data.businessImageUrl,
+            category: data.category,
+            description: data.description,
+            phone: data.phone,
+            email: data.email,
+            website: data.website,
+            address: data.address,
+            city: data.city,
+            province: data.province,
+            postalCode: data.postalCode,
+            longitude: data.longitude,
+            latitude: data.latitude,
+          })
 
-          if (newPost) {
-            setPostId(newPost.id)
+          if (newPostId) {
+            setPostId(newPostId)
             setOpen(true)
           }
 
@@ -167,7 +201,7 @@ const PostForm = ({ post }: { post: Post | undefined }) => {
   const onCheckout = async () => {
     startTransition(async () => {
       try {
-        await checkoutHandler(postId)
+        await checkoutHandler(postId!)
       } catch (error) {
         console.error(error)
         toast.error("Une erreur s'est produite !", {
