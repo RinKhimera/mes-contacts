@@ -11,14 +11,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { changePostStatus } from "@/server/actions/post"
+import { api } from "@/convex/_generated/api"
+import { Id } from "@/convex/_generated/dataModel"
+import { useMutation } from "convex/react"
 import { LoaderCircle, ToggleLeft, ToggleRight } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 type CheckoutButtonProps = {
-  postId: string
+  postId: Id<"posts">
   postStatus: string
   variant?: "button" | "menu"
   onActionComplete?: () => void
@@ -32,19 +33,19 @@ export const SwitchStatusButton = ({
 }: CheckoutButtonProps) => {
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
-  const router = useRouter()
+
+  const changePostStatus = useMutation(api.posts.changePostStatus)
 
   const handleStatusChange = () => {
     startTransition(async () => {
       try {
-        const updatedPost = await changePostStatus(postId)
+        await changePostStatus({ postId })
         setOpen(false)
-        router.refresh()
 
-        if (updatedPost.status === "PUBLISHED") {
-          toast.success("L'annonce a été activée")
-        } else {
+        if (postStatus === "PUBLISHED") {
           toast.info("L'annonce a été désactivée")
+        } else {
+          toast.success("L'annonce a été activée")
         }
       } catch (error) {
         console.error(error)
