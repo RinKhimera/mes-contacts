@@ -1,10 +1,12 @@
+import { SiteFooter } from "@/components/shared/site-footer"
 import { SiteHeader } from "@/components/shared/site-header"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <section>
+    <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      {children}
-    </section>
+      <main className="flex-1">{children}</main>
+      <SiteFooter />
+    </div>
   )
 }

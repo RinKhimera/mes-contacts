@@ -116,25 +116,13 @@ export const data = {
       isActive: true,
       items: [
         {
-          title: "Accueil",
-          url: "/dashboard",
-        },
-        {
-          title: "Recherche",
-          url: "/dashboard/search",
+          title: "Mes annonces",
+          url: "/dashboard/my-posts",
         },
         {
           title: "Nouvelle annonce",
           url: "/dashboard/new-post",
         },
-        {
-          title: "Mes annonces",
-          url: "/dashboard/my-posts",
-        },
-        // {
-        //   title: "Mes favoris",
-        //   url: "#",
-        // },
       ],
     },
     {

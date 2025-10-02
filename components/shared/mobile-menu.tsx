@@ -1,91 +1,106 @@
 import { AvatarDropdown } from "@/components/shared/avatar-dropdown"
-import { ModeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { navItems } from "@/constants"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import type { User } from "@clerk/backend"
-import { Ellipsis, KeyRound, LogIn } from "lucide-react"
+import {
+  LayoutDashboard,
+  Menu,
+  PlusCircle,
+  Search,
+  UserCircle,
+} from "lucide-react"
 import Link from "next/link"
+import { Separator } from "../ui/separator"
 
 type MobileMenuProps = {
   userId: string | null
   user: User | null
 }
 
-const AuthLinks = () => (
-  <>
-    <DropdownMenuSeparator />
-
-    <DropdownMenuGroup>
-      <Link href={"/auth/sign-in"}>
-        <DropdownMenuItem className="cursor-pointer">
-          Se connecter
-          <DropdownMenuShortcut>
-            <LogIn size={20} />
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </Link>
-
-      <Link href={"/auth/sign-up"}>
-        <DropdownMenuItem className="cursor-pointer">
-          S&apos;inscrire
-          <DropdownMenuShortcut>
-            <KeyRound size={20} />
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </Link>
-    </DropdownMenuGroup>
-  </>
-)
-
-const NavItems = () => (
-  <DropdownMenuGroup>
-    {navItems.map((item) => (
-      <Link key={item.href} href={item.href}>
-        <DropdownMenuItem className="cursor-pointer">
-          {item.label}
-        </DropdownMenuItem>
-      </Link>
-    ))}
-  </DropdownMenuGroup>
-)
-
 export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
   return (
-    <nav className="flex items-center gap-2 lg:hidden">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size={"icon"} variant="ghost">
-            <Ellipsis />
-          </Button>
-        </DropdownMenuTrigger>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button size="icon" variant="ghost" className="md:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-80">
+        <SheetHeader>
+          <SheetTitle className="text-left">Menu</SheetTitle>
+        </SheetHeader>
 
-        <DropdownMenuContent className="w-52" align="end">
-          <DropdownMenuGroup>
-            {userId && (
-              <Link href={"/dashboard"}>
-                <DropdownMenuItem className="cursor-pointer">
-                  Mon tableau de bord
-                </DropdownMenuItem>
+        <div className="mt-6 flex flex-col gap-4">
+          {/* User Info */}
+          {userId && user && (
+            <>
+              <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+                <AvatarDropdown user={user} />
+                <div className="flex-1 overflow-hidden">
+                  <p className="truncate font-medium">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="truncate text-sm text-muted-foreground">
+                    {user.emailAddresses[0].emailAddress}
+                  </p>
+                </div>
+              </div>
+              <Separator />
+            </>
+          )}
+
+          {/* Navigation Links */}
+          <nav className="flex flex-col gap-2">
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/recherche">
+                <Search className="h-5 w-5" />
+                Rechercher
               </Link>
+            </Button>
+
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/dashboard/new-post">
+                <PlusCircle className="h-5 w-5" />
+                Nouvelle annonce
+              </Link>
+            </Button>
+
+            {userId && (
+              <Button variant="ghost" className="justify-start gap-3" asChild>
+                <Link href="/dashboard">
+                  <LayoutDashboard className="h-5 w-5" />
+                  Tableau de bord
+                </Link>
+              </Button>
             )}
-            <NavItems />
-          </DropdownMenuGroup>
-          {!userId && <AuthLinks />}
-        </DropdownMenuContent>
-      </DropdownMenu>
 
-      <ModeToggle />
-
-      {userId && <AvatarDropdown user={user} />}
-    </nav>
+            {!userId && (
+              <>
+                <Separator className="my-2" />
+                <Button variant="ghost" className="justify-start gap-3" asChild>
+                  <Link href="/auth/sign-in">
+                    <UserCircle className="h-5 w-5" />
+                    Connexion
+                  </Link>
+                </Button>
+                <Button className="justify-start gap-3" asChild>
+                  <Link href="/auth/sign-up">
+                    <UserCircle className="h-5 w-5" />
+                    Inscription
+                  </Link>
+                </Button>
+              </>
+            )}
+          </nav>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

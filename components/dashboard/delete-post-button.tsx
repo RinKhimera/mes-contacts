@@ -12,7 +12,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { deletePost } from "@/server/actions/post"
 import { LoaderCircle, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -25,7 +24,7 @@ type DeletePostButtonProps = {
 }
 
 export const DeletePostButton = ({
-  postId,
+  // postId,
   variant = "button",
   onActionComplete,
 }: DeletePostButtonProps) => {
@@ -37,7 +36,7 @@ export const DeletePostButton = ({
   const handleDeletePost = () => {
     startTransition(async () => {
       try {
-        await deletePost(postId)
+        // await deletePost(postId)
         setOpen(false)
         router.refresh()
         toast.info("La publication a été supprimée")
