@@ -342,3 +342,62 @@ export const searchPostsCombined = query({
     return filteredPosts
   },
 })
+
+// Recherche avancée avec filtres multiples
+export const searchPostsAdvanced = query({
+  args: {
+    searchTerm: v.optional(v.string()),
+    category: v.optional(v.string()),
+    province: v.optional(v.string()),
+    city: v.optional(v.string()),
+    status: v.optional(
+      v.union(
+        v.literal("DRAFT"),
+        v.literal("PUBLISHED"),
+        v.literal("DISABLED"),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    let posts = await ctx.db.query("posts").order("desc").collect()
+
+    // Filtrer par statut (par défaut uniquement PUBLISHED)
+    if (args.status) {
+      posts = posts.filter((post) => post.status === args.status)
+    } else {
+      posts = posts.filter((post) => post.status === "PUBLISHED")
+    }
+
+    // Filtrer par catégorie
+    if (args.category && args.category !== "all") {
+      posts = posts.filter((post) => post.category === args.category)
+    }
+
+    // Filtrer par province
+    if (args.province && args.province !== "all") {
+      posts = posts.filter((post) => post.province === args.province)
+    }
+
+    // Filtrer par ville
+    if (args.city && args.city.trim() !== "") {
+      const normalizedCity = args.city.trim().toLowerCase()
+      posts = posts.filter((post) =>
+        post.city.toLowerCase().includes(normalizedCity),
+      )
+    }
+
+    // Filtrer par terme de recherche
+    if (args.searchTerm && args.searchTerm.trim() !== "") {
+      const normalizedTerm = args.searchTerm.trim().toLowerCase()
+      posts = posts.filter(
+        (post) =>
+          post.businessName.toLowerCase().includes(normalizedTerm) ||
+          post.description?.toLowerCase().includes(normalizedTerm) ||
+          post.city.toLowerCase().includes(normalizedTerm) ||
+          post.address.toLowerCase().includes(normalizedTerm),
+      )
+    }
+
+    return posts
+  },
+})

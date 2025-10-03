@@ -60,7 +60,7 @@ export function CategoryGrid() {
         {categoriesServices.map((category) => (
           <Link
             key={category}
-            href={`/services/${encodeURIComponent(category)}`}
+            href={`/recherche?category=${encodeURIComponent(category)}`}
           >
             <Card className="group h-full transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/10">
               <CardHeader>

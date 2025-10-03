@@ -3,16 +3,23 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MapPin, Search } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export function Hero() {
+  const router = useRouter()
   const [service, setService] = useState("")
   const [location, setLocation] = useState("")
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implémenter la logique de recherche
-    console.log("Recherche:", { service, location })
+
+    const params = new URLSearchParams()
+    if (service.trim()) params.set("q", service.trim())
+    if (location.trim()) params.set("city", location.trim())
+
+    const queryString = params.toString()
+    router.push(`/recherche${queryString ? `?${queryString}` : ""}`)
   }
 
   return (

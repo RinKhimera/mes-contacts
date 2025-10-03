@@ -15,9 +15,12 @@ const footerLinks = {
     { label: "Carrières", href: "/carrieres" },
   ],
   legal: [
-    { label: "Conditions d'utilisation", href: "/conditions" },
-    { label: "Politique de confidentialité", href: "/confidentialite" },
-    { label: "Cookies", href: "/cookies" },
+    { label: "Conditions d'utilisation", href: "/conditions-utilisation" },
+    {
+      label: "Politique de confidentialité",
+      href: "/politique-confidentialite",
+    },
+    { label: "Cookies", href: "/politique-cookies" },
   ],
   support: [
     { label: "Centre d'aide", href: "/aide" },
