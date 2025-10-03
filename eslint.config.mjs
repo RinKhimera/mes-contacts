@@ -9,30 +9,29 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 })
 
-const eslintConfig = [
-  {
-    ignores: [
-      ".next/**",
-      "node_modules/**",
-      "out/**",
-      "build/**",
-      ".convex/**",
-      "convex/_generated/**",
-      "public/**",
-      "*.config.js",
-      "*.config.ts",
-      "*.config.mjs",
-      ".turbo/**",
-      "dist/**",
-    ],
+const eslintConfig = [{
+  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]
+}, {
+  ignores: [
+    ".next/**",
+    "node_modules/**",
+    "out/**",
+    "build/**",
+    ".convex/**",
+    "convex/_generated/**",
+    "public/**",
+    "*.config.js",
+    "*.config.ts",
+    "*.config.mjs",
+    ".turbo/**",
+    "dist/**",
+  ],
+}, ...compat.config({
+  extends: ["next/core-web-vitals", "next/typescript"],
+  rules: {
+    "@next/next/no-html-link-for-pages": "off",
+    "react/no-unescaped-entities": "off",
   },
-  ...compat.config({
-    extends: ["next/core-web-vitals", "next/typescript"],
-    rules: {
-      "@next/next/no-html-link-for-pages": "off",
-      "react/no-unescaped-entities": "off",
-    },
-  }),
-]
+})]
 
 export default eslintConfig
