@@ -20,7 +20,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
-function PostCard({ post }: { post: Doc<"posts"> }) {
+const PostCard = ({ post }: { post: Doc<"posts"> }) => {
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardHeader className="p-0">
@@ -109,7 +109,7 @@ function PostCard({ post }: { post: Doc<"posts"> }) {
   )
 }
 
-function LoadingSkeleton() {
+const LoadingSkeleton = () => {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {[...Array(6)].map((_, i) => (
@@ -127,7 +127,7 @@ function LoadingSkeleton() {
   )
 }
 
-export function SearchResults() {
+export const SearchResults = () => {
   const searchParams = useSearchParams()
 
   const searchTerm = searchParams.get("q") || undefined

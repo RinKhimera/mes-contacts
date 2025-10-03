@@ -144,6 +144,17 @@ UploadThing integration in `utils/uploadthing.ts` + `app/api/uploadthing/core.ts
 - Strict mode enabled
 - Use Convex generated types: `Doc<"posts">`, `Id<"posts">` from `convex/_generated/dataModel`
 - Import Convex API: `import { api } from "@/convex/_generated/api"`
+- **Function declarations**: Always use arrow functions with `const`, never use `function` keyword
+
+  ```typescript
+  // ✅ Correct
+  const myFunction = () => {}
+  const MyComponent = () => <div>...</div>
+
+  // ❌ Wrong
+  function myFunction() {}
+  function MyComponent() { return <div>...</div> }
+  ```
 
 ### Styling
 
