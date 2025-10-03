@@ -98,7 +98,7 @@ const PostCard = ({ post }: { post: Doc<"posts"> }) => {
         {/* Actions */}
         <div className="mt-4 flex gap-2">
           <Button asChild variant="default" size="sm" className="flex-1">
-            <Link href={`/post/${post._id}`}>
+            <Link href={`/annonce/${post._id}`}>
               <TrendingUp className="mr-2 h-4 w-4" />
               Voir les détails
             </Link>

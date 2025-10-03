@@ -54,8 +54,33 @@ Uses **Convex + Clerk** integration pattern:
 3. Convex mutations validate auth via `ctx.auth.getUserIdentity()`
 4. Provider setup: `ConvexProviderWithClerk` wraps `ClerkProvider` in `providers/convex-client-provider.tsx`
 
+**CRITICAL: Always use `useCurrentUser` hook for auth in client components:**
+
 ```typescript
-// Typical Convex mutation auth check
+// ✅ Correct: Use custom hook for consistent auth
+import { useCurrentUser } from "@/hooks/useCurrentUser"
+
+const MyComponent = () => {
+  const { currentUser, isLoading } = useCurrentUser()
+
+  // Handle loading state
+  if (isLoading) return <Loader />
+
+  // Use currentUser for Convex queries
+  const data = useQuery(
+    api.module.function,
+    currentUser ? { userId: currentUser._id } : "skip"
+  )
+}
+
+// ❌ Wrong: Don't use Clerk's useUser() directly with Convex
+import { useUser } from "@clerk/nextjs"
+const { user } = useUser() // This causes "Unauthorized" errors
+```
+
+**Typical Convex mutation auth check:**
+
+```typescript
 const identity = await ctx.auth.getUserIdentity()
 if (!identity) throw new Error("Unauthorized")
 const user = await ctx.db

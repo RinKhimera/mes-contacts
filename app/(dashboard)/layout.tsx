@@ -1,11 +1,4 @@
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
-import { DynamicBreadcrumb } from "@/components/shared/dynamic-breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SiteHeader } from "@/components/shared/site-header"
 import TanstackClientProvider from "@/providers/tanstack-provider"
 
 export default function DashboardLayout({
@@ -14,19 +7,11 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <section>
-      <SidebarProvider>
-        <DashboardSidebar />
-
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <DynamicBreadcrumb />
-          </header>
-          <TanstackClientProvider>{children}</TanstackClientProvider>
-        </SidebarInset>
-      </SidebarProvider>
-    </section>
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+      <main className="flex-1">
+        <TanstackClientProvider>{children}</TanstackClientProvider>
+      </main>
+    </div>
   )
 }

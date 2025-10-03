@@ -1,44 +1,104 @@
-import { AvatarDropdown } from "@/components/shared/avatar-dropdown"
-import { buttonVariants } from "@/components/ui/button"
-import { auth, currentUser } from "@clerk/nextjs/server"
-import { FileQuestion } from "lucide-react"
+import { SiteHeader } from "@/components/shared/site-header"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { AlertCircle, Home, Search } from "lucide-react"
 import Link from "next/link"
 
-export default async function NotFound() {
-  const { userId } = await auth()
-  const user = await currentUser()
-
+export default function NotFound() {
   return (
-    <div className="mx-auto h-screen w-full max-w-6xl px-4 md:px-10 lg:px-20 xl:px-0">
-      <div className="flex justify-between pt-4">
-        <Link
-          href="/"
-          className="-mt-1 text-3xl font-bold text-accent-foreground"
-        >
-          mc.ca
-        </Link>
+    <div className="min-h-screen">
+      <SiteHeader />
+      <div className="container mx-auto px-4 py-16">
+        <div className="mx-auto max-w-2xl">
+          {/* Icône et titre */}
+          <div className="mb-8 text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="rounded-full bg-primary/10 p-4">
+                <AlertCircle className="h-16 w-16 text-primary" />
+              </div>
+            </div>
+            <h1 className="mb-2 text-4xl font-bold md:text-6xl">404</h1>
+            <h2 className="text-xl font-semibold text-muted-foreground md:text-2xl">
+              Page non trouvée
+            </h2>
+          </div>
 
-        {userId && <AvatarDropdown user={user} />}
-      </div>
+          {/* Message d'erreur */}
+          <Alert className="mb-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Oups ! Cette page n&apos;existe pas</AlertTitle>
+            <AlertDescription>
+              La page que vous recherchez a peut-être été déplacée, supprimée ou
+              n&apos;a jamais existé.
+            </AlertDescription>
+          </Alert>
 
-      <div className="flex h-[calc(100vh-80px)] flex-col items-center justify-center p-8">
-        <FileQuestion size={100} className="-mt-5 text-red-500" />
-        <div className="flex flex-col items-center gap-4 text-center">
-          <h1 className="mt-5 text-4xl font-semibold md:text-6xl">
-            <span className="text-red-500">404</span> - Page non trouvée
-          </h1>
-          <p className="max-w-md text-muted-foreground">
-            La page a été supprimée… ou alors elle est juste bien cachée dans le{" "}
-            <Link
-              className="text-red-500 hover:underline"
-              href="https://github.com/RinKhimera/mes-contacts"
+          {/* Suggestions */}
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <h3 className="mb-4 font-semibold">
+                Que pouvez-vous faire maintenant ?
+              </h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5">•</span>
+                  <span>
+                    Vérifiez l&apos;URL pour vous assurer qu&apos;elle est
+                    correcte
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5">•</span>
+                  <span>
+                    Retournez à la page d&apos;accueil et naviguez à partir de
+                    là
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5">•</span>
+                  <span>
+                    Utilisez la recherche pour trouver ce que vous cherchez
+                  </span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button asChild size="lg" className="w-full sm:w-auto sm:min-w-40">
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                Page d&apos;accueil
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto sm:min-w-40"
             >
-              code source ?
-            </Link>
+              <Link href="/recherche">
+                <Search className="mr-2 h-4 w-4" />
+                Rechercher
+              </Link>
+            </Button>
+          </div>
+
+          {/* Footer humoristique */}
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Ou peut-être que cette page est{" "}
+            <Link
+              className="text-primary hover:underline"
+              href="https://github.com/RinKhimera/mes-contacts"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              bien cachée dans le code source
+            </Link>{" "}
+            ?
           </p>
-          <Link className={buttonVariants({ variant: "secondary" })} href={"/"}>
-            Retourner à la page d&apos;accueil
-          </Link>
         </div>
       </div>
     </div>
