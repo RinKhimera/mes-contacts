@@ -1,28 +1,74 @@
 "use client"
 
-import { PostLocation } from "@/components/post/post-location"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { PostDetailContent } from "@/app/(app-pages)/annonce/[id]/_components/post-detail-content"
+import { PostDetailMap } from "@/app/(app-pages)/annonce/[id]/_components/post-detail-map"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/convex/_generated/api"
-import { Id } from "@/convex/_generated/dataModel"
-import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
+import type { Id } from "@/convex/_generated/dataModel"
 import { useQuery } from "convex/react"
-import {
-  Contact as ContactIcon,
-  FileText as FileTextIcon,
-  Globe,
-  Mail,
-  Map,
-  MapPin as MapPinIcon,
-  Phone,
-  Tag as TagIcon,
-} from "lucide-react"
-import Image from "next/image"
+import { AlertCircle, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 import { use } from "react"
+
+const LoadingSkeleton = () => {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb skeleton */}
+      <div className="mb-6 flex items-center gap-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-1" />
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-1" />
+        <Skeleton className="h-4 w-40" />
+      </div>
+
+      {/* Contenu principal */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Colonne gauche - Détails */}
+        <div className="space-y-6">
+          {/* Image */}
+          <Skeleton className="aspect-video w-full rounded-lg" />
+
+          {/* Titre et badge */}
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+
+          {/* Informations de contact */}
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-48" />
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+
+          {/* Boutons d'action */}
+          <div className="flex gap-3">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 flex-1" />
+          </div>
+        </div>
+
+        {/* Colonne droite - Carte */}
+        <div className="lg:sticky lg:top-20 lg:self-start">
+          <Skeleton className="h-[400px] w-full rounded-lg" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const DashboardPostDetails = ({
   params,
@@ -34,256 +80,63 @@ const DashboardPostDetails = ({
 
   const post = useQuery(api.posts.getPostById, { postId })
 
+  // Loading state
   if (post === undefined) {
+    return <LoadingSkeleton />
+  }
+
+  // Post not found
+  if (post === null) {
     return (
-      <div className="p-4 pt-0">
-        <h1 className="text-4xl font-bold">Infos sur le post</h1>
-
-        <div className="my-4 max-w-5xl">
-          <div className="w-full max-w-2xl cursor-default border-l-8">
-            <Card className="flex border-none p-0 shadow-none transition-colors max-sm:flex-col sm:items-end">
-              <div className="flex w-[180px] items-center justify-center pl-4 max-sm:pt-4">
-                <AspectRatio ratio={1} className="bg-muted">
-                  <Skeleton className="h-full w-full" />
-                </AspectRatio>
-              </div>
-
-              <div className="flex-1 pl-4">
-                <div className="flex flex-col space-y-2 pt-4 tracking-tight">
-                  <Skeleton className="h-8 w-3/4" />
-                  <Skeleton className="mb-2 h-4 w-full" />
-                  <div className="flex flex-col space-y-2 pt-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                    <Skeleton className="h-10 w-full sm:w-32" />
-                    <Skeleton className="h-10 w-full sm:w-32" />
-                    <Skeleton className="h-10 w-full sm:w-32" />
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <div className="mt-10 grid max-w-4xl grid-cols-1 gap-6 lg:grid-cols-2">
-            <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-3 flex items-center gap-2">
-                <TagIcon className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold tracking-tight">
-                  Catégorie
-                </h3>
-              </div>
-              <Skeleton className="h-5 w-1/2" />
-            </Card>
-
-            <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-3 flex items-center gap-2">
-                <FileTextIcon className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold tracking-tight">
-                  Détails et description
-                </h3>
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-full" />
-                <Skeleton className="h-5 w-full" />
-                <Skeleton className="h-5 w-2/3" />
-              </div>
-            </Card>
-
-            <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-3 flex items-center gap-2">
-                <MapPinIcon className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold tracking-tight">
-                  Localisation
-                </h3>
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-full" />
-                <Skeleton className="h-5 w-3/4" />
-              </div>
-            </Card>
-
-            <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-3 flex items-center gap-2">
-                <ContactIcon className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold tracking-tight">
-                  Contacts
-                </h3>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />
-                  <Skeleton className="h-5 w-1/2" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />
-                  <Skeleton className="h-5 w-2/3" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />
-                  <Skeleton className="h-5 w-1/2" />
-                </div>
-              </div>
-            </Card>
-
-            {/* Section de la carte qui occupe toute la largeur */}
-            <Card className="col-span-1 p-5 shadow-sm transition-all hover:shadow-md lg:col-span-2">
-              <div className="mb-3 flex items-center gap-2">
-                <Map className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold tracking-tight">Carte</h3>
-              </div>
-              <Skeleton className="h-[400px] w-full" />
-            </Card>
-          </div>
+      <div className="container mx-auto px-4 py-16">
+        <Alert variant="destructive" className="mx-auto max-w-2xl">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Annonce non trouvée</AlertTitle>
+          <AlertDescription>
+            Cette annonce n&apos;existe pas ou a été supprimée.
+          </AlertDescription>
+        </Alert>
+        <div className="mt-6 text-center">
+          <Button asChild variant="outline">
+            <Link href="/dashboard/my-posts">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Retour à mes annonces
+            </Link>
+          </Button>
         </div>
       </div>
     )
   }
 
-  if (post === null) {
-    notFound()
-  }
-
   return (
-    <div className="p-4 pt-0">
-      <h1 className="text-4xl font-bold">Infos sur le post</h1>
+    <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb */}
+      <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/dashboard" className="hover:text-foreground">
+          Tableau de bord
+        </Link>
+        <span>/</span>
+        <Link href="/dashboard/my-posts" className="hover:text-foreground">
+          Mes annonces
+        </Link>
+        <span>/</span>
+        <span className="font-medium text-foreground">{post.businessName}</span>
+      </nav>
 
-      <div className="my-4 max-w-5xl">
-        <div className="w-full max-w-2xl cursor-default border-l-8">
-          <Card className="flex border-none p-0 shadow-none transition-colors max-sm:flex-col sm:items-end">
-            <div className="flex w-[180px] items-center justify-center pl-4 max-sm:pt-4">
-              <AspectRatio ratio={1} className="bg-muted">
-                <Image
-                  src={post.businessImageUrl || postImagePlaceholder}
-                  alt="Business image"
-                  className="rounded-md object-cover"
-                  priority
-                  // placeholder="blur"
-                  fill
-                />
-              </AspectRatio>
-            </div>
-
-            <div className="flex-1 pl-4">
-              <div className="flex flex-col space-y-0 pt-4 tracking-tight">
-                <h1 className="text-3xl font-bold">{post.businessName}</h1>
-                <p className="pb-2 text-muted-foreground">
-                  {`${post.address}, ${post.city} ${post.province} ${post.postalCode}`}
-                </p>
-                <div className="flex flex-col space-y-2 pt-0 sm:flex-row sm:space-y-0 sm:space-x-2">
-                  <Button className="w-full sm:w-auto" asChild>
-                    <Link href={`tel:${post.phone}`} target="_blank">
-                      <Phone className="mr-2 h-4 w-4" />
-                      Téléphone
-                    </Link>
-                  </Button>
-                  <Button className="w-full sm:w-auto" asChild>
-                    <Link href={`mailto:${post.email}`} target="_blank">
-                      <Mail className="mr-2 h-4 w-4" />
-                      Courriel
-                    </Link>
-                  </Button>
-                  {post.website && (
-                    <Button className="w-full sm:w-auto" asChild>
-                      <Link href={post.website} target="_blank">
-                        <Globe className="mr-2 h-4 w-4" />
-                        Site web
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
+      {/* Contenu principal */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Colonne gauche - Détails */}
+        <div>
+          <PostDetailContent post={post} />
         </div>
 
-        <div className="mt-10 grid max-w-4xl grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="mb-3 flex items-center gap-2">
-              <TagIcon className="h-5 w-5 text-primary" />
-              <h3 className="text-xl font-semibold tracking-tight">
-                Catégorie
-              </h3>
-            </div>
-            <p className="text-muted-foreground">{post.category}</p>
-          </Card>
-
-          <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="mb-3 flex items-center gap-2">
-              <FileTextIcon className="h-5 w-5 text-primary" />
-              <h3 className="text-xl font-semibold tracking-tight">
-                Détails et description
-              </h3>
-            </div>
-            {post.description ? (
-              <p className="text-muted-foreground">{post.description}</p>
-            ) : (
-              <p className="text-muted-foreground italic">Aucune description</p>
-            )}
-          </Card>
-
-          <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="mb-3 flex items-center gap-2">
-              <MapPinIcon className="h-5 w-5 text-primary" />
-              <h3 className="text-xl font-semibold tracking-tight">
-                Localisation
-              </h3>
-            </div>
-            <div className="text-muted-foreground">
-              <p>{post.address}</p>
-              <p>
-                {post.city}, {post.province}
-              </p>
-            </div>
-          </Card>
-
-          <Card className="p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="mb-3 flex items-center gap-2">
-              <ContactIcon className="h-5 w-5 text-primary" />
-              <h3 className="text-xl font-semibold tracking-tight">Contacts</h3>
-            </div>
-            <div className="space-y-2 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <p>{post.phone}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <p>{post.email}</p>
-              </div>
-              {post.website && (
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <Link
-                    href={post.website}
-                    target="_blank"
-                    className="text-primary hover:underline"
-                  >
-                    {post.website}
-                  </Link>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {/* Section de la carte qui occupe toute la largeur */}
-          <Card className="col-span-1 p-5 shadow-sm transition-all hover:shadow-md lg:col-span-2">
-            <div className="mb-3 flex items-center gap-2">
-              <Map className="h-5 w-5 text-primary" />
-              <h3 className="text-xl font-semibold tracking-tight">Carte</h3>
-            </div>
-            {post.geo?.longitude && post.geo?.latitude ? (
-              <div className="h-[400px] w-full">
-                <PostLocation
-                  longitude={post.geo.longitude}
-                  latitude={post.geo.latitude}
-                />
-              </div>
-            ) : (
-              <div className="flex h-[400px] items-center justify-center rounded-md border border-dashed bg-muted/20">
-                <p className="text-muted-foreground">
-                  Aucune localisation disponible
-                </p>
-              </div>
-            )}
-          </Card>
+        {/* Colonne droite - Carte */}
+        <div className="lg:sticky lg:top-20 lg:self-start">
+          <PostDetailMap
+            longitude={post.geo?.longitude}
+            latitude={post.geo?.latitude}
+            businessName={post.businessName}
+          />
         </div>
       </div>
     </div>

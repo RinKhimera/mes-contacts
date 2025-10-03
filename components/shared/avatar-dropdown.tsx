@@ -9,27 +9,35 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { User } from "@clerk/backend"
+import type { Doc } from "@/convex/_generated/dataModel"
 import { SignOutButton } from "@clerk/nextjs"
 import { LogOut, Settings, UserRound } from "lucide-react"
 import Link from "next/link"
 
-export const AvatarDropdown = ({ user }: { user: User | null }) => {
+export const AvatarDropdown = ({ user }: { user: Doc<"users"> | null }) => {
+  const getInitials = (name: string) => {
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="cursor-pointer">
-          <AvatarImage src={user?.imageUrl} />
-          <AvatarFallback>XO</AvatarFallback>
+          <AvatarImage src={user?.image} />
+          <AvatarFallback>
+            {user?.name ? getInitials(user.name) : "XO"}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-52" align="end" alignOffset={-1}>
-        <DropdownMenuLabel>
-          {user?.firstName} {user?.lastName}
-        </DropdownMenuLabel>
+        <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
         <DropdownMenuLabel className="text-muted-foreground">
-          {user?.emailAddresses[0].emailAddress}
+          {user?.email}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

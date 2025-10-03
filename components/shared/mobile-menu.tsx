@@ -7,7 +7,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import type { User } from "@clerk/backend"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { Doc } from "@/convex/_generated/dataModel"
 import {
   LayoutDashboard,
   Menu,
@@ -19,11 +20,11 @@ import Link from "next/link"
 import { Separator } from "../ui/separator"
 
 type MobileMenuProps = {
-  userId: string | null
-  user: User | null
+  currentUser: Doc<"users"> | null | undefined
+  isLoading: boolean
 }
 
-export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
+export const MobileMenu = ({ currentUser, isLoading }: MobileMenuProps) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -39,21 +40,29 @@ export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
 
         <div className="mt-6 flex flex-col gap-4">
           {/* User Info */}
-          {userId && user && (
-            <>
-              <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
-                <AvatarDropdown user={user} />
-                <div className="flex-1 overflow-hidden">
-                  <p className="truncate font-medium">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="truncate text-sm text-muted-foreground">
-                    {user.emailAddresses[0].emailAddress}
-                  </p>
-                </div>
+          {isLoading ? (
+            <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-40" />
               </div>
-              <Separator />
-            </>
+            </div>
+          ) : (
+            currentUser && (
+              <>
+                <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+                  <AvatarDropdown user={currentUser} />
+                  <div className="flex-1 overflow-hidden">
+                    <p className="truncate font-medium">{currentUser.name}</p>
+                    <p className="truncate text-sm text-muted-foreground">
+                      {currentUser.email}
+                    </p>
+                  </div>
+                </div>
+                <Separator />
+              </>
+            )
           )}
 
           {/* Navigation Links */}
@@ -72,7 +81,7 @@ export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
               </Link>
             </Button>
 
-            {userId && (
+            {currentUser && (
               <Button variant="ghost" className="justify-start gap-3" asChild>
                 <Link href="/dashboard">
                   <LayoutDashboard className="h-5 w-5" />
@@ -81,7 +90,7 @@ export const MobileMenu = ({ user, userId }: MobileMenuProps) => {
               </Button>
             )}
 
-            {!userId && (
+            {!currentUser && !isLoading && (
               <>
                 <Separator className="my-2" />
                 <Button variant="ghost" className="justify-start gap-3" asChild>

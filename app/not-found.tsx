@@ -1,3 +1,5 @@
+"use client"
+
 import { SiteHeader } from "@/components/shared/site-header"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"

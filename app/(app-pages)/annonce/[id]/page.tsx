@@ -72,11 +72,11 @@ const LoadingSkeleton = () => {
   )
 }
 
-export default function PostDetailPage({
+const AnnonceDetailsPage = ({
   params,
 }: {
   params: Promise<{ id: string }>
-}) {
+}) => {
   const { id } = use(params)
   const postId = id as Id<"posts">
   const post = useQuery(api.posts.getPostById, { postId })
@@ -173,3 +173,5 @@ export default function PostDetailPage({
     </div>
   )
 }
+
+export default AnnonceDetailsPage

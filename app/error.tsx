@@ -37,7 +37,7 @@ const Error = ({
           {/* Icône et titre */}
           <div className="mb-8 text-center">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-destructive/10 p-6">
+              <div className="rounded-full bg-destructive/10 p-4">
                 <AlertCircle className="h-16 w-16 text-destructive" />
               </div>
             </div>

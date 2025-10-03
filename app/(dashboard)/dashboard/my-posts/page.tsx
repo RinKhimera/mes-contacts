@@ -3,6 +3,8 @@
 import { PostActions } from "@/components/dashboard/post-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -14,24 +16,50 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { api } from "@/convex/_generated/api"
-import { useConvexAuth, useQuery } from "convex/react"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useQuery } from "convex/react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { FileText, Plus, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
 const MyPosts = () => {
-  const { isAuthenticated } = useConvexAuth()
+  const { currentUser, isLoading: isUserLoading } = useCurrentUser()
   const userPosts = useQuery(
     api.posts.getCurrentUserPosts,
-    isAuthenticated ? undefined : "skip",
+    currentUser ? {} : "skip",
   )
 
-  if (userPosts === undefined) {
-    return (
-      <div className="p-4 pt-0">
-        <h1 className="text-4xl font-bold">Mes annonces</h1>
+  // Calculer les statistiques rapides
+  const publishedCount =
+    userPosts?.filter((p) => p.status === "PUBLISHED").length || 0
+  const draftCount = userPosts?.filter((p) => p.status === "DRAFT").length || 0
 
-        <div className="@container my-4">
+  if (isUserLoading || userPosts === undefined) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        {/* En-tête skeleton */}
+        <div className="mb-8 space-y-3">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-6 w-96" />
+        </div>
+
+        {/* Stats skeleton */}
+        <div className="mb-6 grid gap-4 sm:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <Skeleton className="mb-2 h-4 w-20" />
+                <Skeleton className="h-8 w-12" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Separator className="mb-8" />
+
+        {/* Table skeleton */}
+        <div className="@container">
           <Table className="table-fixed">
             <TableCaption>Chargement de vos annonces...</TableCaption>
             <TableHeader>
@@ -86,12 +114,89 @@ const MyPosts = () => {
   }
 
   return (
-    <div className="p-4 pt-0">
-      <h1 className="text-4xl font-bold">Mes annonces</h1>
+    <div className="container mx-auto px-4 py-8">
+      {/* En-tête */}
+      <div className="mb-8">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-primary/10 p-2">
+              <FileText className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Mes annonces
+            </h1>
+          </div>
+          <Button asChild>
+            <Link href="/dashboard/new-post">
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle annonce
+            </Link>
+          </Button>
+        </div>
+        <p className="text-lg text-muted-foreground">
+          Gérez toutes vos annonces et suivez leurs performances.
+        </p>
+      </div>
 
-      <div className="@container my-4">
+      {/* Statistiques rapides */}
+      {userPosts.length > 0 && (
+        <>
+          <div className="mb-6 grid gap-4 sm:grid-cols-3">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total
+                    </p>
+                    <p className="text-2xl font-bold">{userPosts.length}</p>
+                  </div>
+                  <FileText className="h-8 w-8 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Publiées
+                    </p>
+                    <p className="text-2xl font-bold">{publishedCount}</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Brouillons
+                    </p>
+                    <p className="text-2xl font-bold">{draftCount}</p>
+                  </div>
+                  <FileText className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Separator className="mb-8" />
+        </>
+      )}
+
+      {/* Table des annonces */}
+      <div className="@container">
         <Table className="table-fixed">
-          <TableCaption>Liste de vos annonces</TableCaption>
+          <TableCaption>
+            {userPosts.length > 0
+              ? "Liste complète de vos annonces"
+              : "Aucune annonce pour le moment"}
+          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="hidden @md:table-cell @md:w-1/5 @lg:w-1/5">
@@ -159,13 +264,27 @@ const MyPosts = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="space-y-5 text-center">
-                  <p className="text-muted-foreground italic">
-                    Vous n&apos;avez pas encore publié d&apos;annonce !
-                  </p>
-                  <Button variant={"secondary"} asChild>
-                    <Link href="/dashboard/new-post">Créer une annonce</Link>
-                  </Button>
+                <TableCell colSpan={5} className="h-64">
+                  <div className="flex flex-col items-center justify-center space-y-4 text-center">
+                    <div className="rounded-full bg-muted p-6">
+                      <FileText className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">
+                        Aucune annonce pour le moment
+                      </h3>
+                      <p className="max-w-sm text-sm text-muted-foreground">
+                        Commencez à partager vos services et activités en créant
+                        votre première annonce.
+                      </p>
+                    </div>
+                    <Button asChild size="lg">
+                      <Link href="/dashboard/new-post">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Créer ma première annonce
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

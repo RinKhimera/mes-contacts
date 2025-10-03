@@ -1,14 +1,16 @@
+"use client"
+
 import { AvatarDropdown } from "@/components/shared/avatar-dropdown"
 import { ModeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
-import { auth, currentUser } from "@clerk/nextjs/server"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { Building2, LayoutDashboard, PlusCircle, Search } from "lucide-react"
 import Link from "next/link"
 import { MobileMenu } from "./mobile-menu"
 
-export const SiteHeader = async () => {
-  const { userId } = await auth()
-  const user = await currentUser()
+export const SiteHeader = () => {
+  const { currentUser, isLoading } = useCurrentUser()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,7 +41,9 @@ export const SiteHeader = async () => {
             </Link>
           </Button>
 
-          {userId ? (
+          {isLoading ? (
+            <Skeleton className="h-9 w-32" />
+          ) : currentUser ? (
             <>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/dashboard" className="gap-2">
@@ -63,13 +67,17 @@ export const SiteHeader = async () => {
         {/* Actions Right */}
         <div className="flex items-center gap-2">
           <ModeToggle />
-          {userId && (
-            <div className="hidden md:block">
-              <AvatarDropdown user={user} />
-            </div>
+          {isLoading ? (
+            <Skeleton className="h-9 w-9 rounded-full" />
+          ) : (
+            currentUser && (
+              <div className="hidden md:block">
+                <AvatarDropdown user={currentUser} />
+              </div>
+            )
           )}
           <div className="md:hidden">
-            <MobileMenu userId={userId} user={user} />
+            <MobileMenu currentUser={currentUser} isLoading={isLoading} />
           </div>
         </div>
       </div>
