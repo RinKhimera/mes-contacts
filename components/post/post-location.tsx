@@ -3,11 +3,21 @@
 import Map, { Marker } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { MapPin } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 
 type PostLocationProps = {
   longitude: number | undefined
   latitude: number | undefined
+}
+
+function getDimensionsFromWidth(width: number) {
+  if (width < 768) {
+    return { width: width - 32, height: 400 }
+  } else if (width < 1024) {
+    return { width: width - 64, height: 500 }
+  } else {
+    return { width: 600, height: 400 }
+  }
 }
 
 export const PostLocation = ({ longitude, latitude }: PostLocationProps) => {
@@ -18,28 +28,14 @@ export const PostLocation = ({ longitude, latitude }: PostLocationProps) => {
     zoom: 14,
   })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const updateDimensions = () => {
+      setDimensions(getDimensionsFromWidth(window.innerWidth))
+    }
     updateDimensions()
     window.addEventListener("resize", updateDimensions)
     return () => window.removeEventListener("resize", updateDimensions)
   }, [])
-
-  const updateDimensions = () => {
-    const width = window.innerWidth
-    if (width < 768) {
-      // Mobile
-      setDimensions({ width: width - 32, height: 400 })
-      setViewState((prev) => ({ ...prev, zoom: 14 }))
-    } else if (width < 1024) {
-      // Tablette
-      setDimensions({ width: width - 64, height: 500 })
-      setViewState((prev) => ({ ...prev, zoom: 14 }))
-    } else {
-      // Desktop
-      setDimensions({ width: 600, height: 400 })
-      setViewState((prev) => ({ ...prev, zoom: 14 }))
-    }
-  }
 
   if (!longitude || !latitude) {
     return null

@@ -333,7 +333,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
             <FormField
               control={form.control}
               name="businessImageUrl"
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               render={({ field: { value, onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel htmlFor="picture">
@@ -432,7 +431,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
               <FormItem>
                 <FormLabel>Adresse</FormLabel>
                 <FormControl>
-                  {/* @ts-expect-error - AddressAutofill component type issues */}
                   <AddressAutofill
                     accessToken={
                       process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
