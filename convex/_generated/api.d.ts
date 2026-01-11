@@ -8,8 +8,16 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as http from "../http.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_validation from "../lib/validation.js";
+import type * as media from "../media.js";
+import type * as organizationMembers from "../organizationMembers.js";
+import type * as organizations from "../organizations.js";
+import type * as payments from "../payments.js";
 import type * as posts from "../posts.js";
+import type * as statusHistory from "../statusHistory.js";
 import type * as users from "../users.js";
 
 import type {
@@ -19,8 +27,16 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   http: typeof http;
+  "lib/auth": typeof lib_auth;
+  "lib/validation": typeof lib_validation;
+  media: typeof media;
+  organizationMembers: typeof organizationMembers;
+  organizations: typeof organizations;
+  payments: typeof payments;
   posts: typeof posts;
+  statusHistory: typeof statusHistory;
   users: typeof users;
 }>;
 

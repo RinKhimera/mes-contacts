@@ -28,7 +28,7 @@ export const postSchema = z.object({
     "Cette entrée est requise.",
     "Le nom commercial doit comporter au plus 50 caractères.",
   ).transform(transformCapitalize),
-  businessImageUrl: z.string().optional(),
+  // businessImageUrl supprimé - les médias sont maintenant dans une table séparée
   description: z
     .string()
     .trim()

@@ -5,17 +5,19 @@ import { Toaster } from "@/components/ui/sonner"
 import ConvexClientProvider from "@/providers/convex-client-provider"
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { DM_Sans, Fraunces } from "next/font/google"
 import { extractRouterConfig } from "uploadthing/server"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  display: "swap",
 })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -31,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} className="flex justify-center" min-h-screen items-center antialiased`}
+        className={`${fraunces.variable} ${dmSans.variable} min-h-screen antialiased`}
       >
         <ThemeProvider
           attribute="class"
