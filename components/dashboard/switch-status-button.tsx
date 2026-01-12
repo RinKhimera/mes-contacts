@@ -34,12 +34,13 @@ export const SwitchStatusButton = ({
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
 
-  const changePostStatus = useMutation(api.posts.changePostStatus)
+  const changeStatus = useMutation(api.posts.changeStatus)
 
   const handleStatusChange = () => {
+    const newStatus = postStatus === "PUBLISHED" ? "DISABLED" : "PUBLISHED"
     startTransition(async () => {
       try {
-        await changePostStatus({ postId })
+        await changeStatus({ id: postId, status: newStatus })
         setOpen(false)
 
         if (postStatus === "PUBLISHED") {

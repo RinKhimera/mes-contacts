@@ -12,11 +12,28 @@ import { data } from "@/constants"
 import { usePathname } from "next/navigation"
 import React from "react"
 
+// Mapping des chemins info vers leurs titres
+const infoPageTitles: Record<string, string> = {
+  "aide": "Aide",
+  "a-propos": "À propos",
+  "carrieres": "Carrières",
+  "faq": "FAQ",
+  "contact": "Contact",
+  "conditions-utilisation": "Conditions d'utilisation",
+  "politique-confidentialite": "Politique de confidentialité",
+  "politique-cookies": "Politique des cookies",
+}
+
 // Fonction pour obtenir le titre à partir du chemin
 const getTitleFromPath = (path: string): string => {
   // Tableau de bord est la section parent pour tous les chemins /dashboard/*
   if (path === "dashboard") return "Tableau de bord"
   if (path === "account") return "Compte"
+
+  // Vérifier les pages info
+  if (infoPageTitles[path]) {
+    return infoPageTitles[path]
+  }
 
   // Recherche dans la navigation principale
   for (const section of data.navMain) {
@@ -59,9 +76,21 @@ export function DynamicBreadcrumb() {
     )
   }
 
+  // Vérifier si c'est une page info (pas dans le dashboard)
+  const isInfoPage = segments.length > 0 && infoPageTitles[segments[0].path]
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
+        {/* Ajouter "Accueil" pour les pages info */}
+        {isInfoPage && (
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        )}
         {segments.map((segment, index) => (
           <React.Fragment key={segment.path}>
             {index > 0 && <BreadcrumbSeparator />}

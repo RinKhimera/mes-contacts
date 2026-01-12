@@ -42,19 +42,31 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { status, method, limit }) => {
-    let query = ctx.db.query("payments")
+    let results
 
     if (status && method) {
-      query = query.withIndex("by_status_method", (q) =>
-        q.eq("status", status).eq("method", method)
-      )
+      results = await ctx.db
+        .query("payments")
+        .withIndex("by_status_method", (q) =>
+          q.eq("status", status).eq("method", method)
+        )
+        .order("desc")
+        .collect()
     } else if (status) {
-      query = query.withIndex("by_status", (q) => q.eq("status", status))
+      results = await ctx.db
+        .query("payments")
+        .withIndex("by_status", (q) => q.eq("status", status))
+        .order("desc")
+        .collect()
     } else if (method) {
-      query = query.withIndex("by_method", (q) => q.eq("method", method))
+      results = await ctx.db
+        .query("payments")
+        .withIndex("by_method", (q) => q.eq("method", method))
+        .order("desc")
+        .collect()
+    } else {
+      results = await ctx.db.query("payments").order("desc").collect()
     }
-
-    const results = await query.order("desc").collect()
 
     if (limit) {
       return results.slice(0, limit)

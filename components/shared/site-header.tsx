@@ -1,10 +1,10 @@
 "use client"
 
 import { AvatarDropdown } from "@/components/shared/avatar-dropdown"
-import { ModeToggle } from "@/components/shared/theme-toggle"
+import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { Building2, LayoutDashboard, PlusCircle, Search } from "lucide-react"
 import Link from "next/link"
 import { MobileMenu } from "./mobile-menu"
@@ -66,7 +66,7 @@ export const SiteHeader = () => {
 
         {/* Actions Right */}
         <div className="flex items-center gap-2">
-          <ModeToggle />
+          <ThemeToggle />
           {isLoading ? (
             <Skeleton className="h-9 w-9 rounded-full" />
           ) : (

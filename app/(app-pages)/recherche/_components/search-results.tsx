@@ -16,7 +16,6 @@ import {
   Search,
   TrendingUp,
 } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -24,20 +23,9 @@ const PostCard = ({ post }: { post: Doc<"posts"> }) => {
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardHeader className="p-0">
-        {post.businessImageUrl ? (
-          <div className="relative aspect-video overflow-hidden bg-muted">
-            <Image
-              src={post.businessImageUrl}
-              alt={post.businessName}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          </div>
-        ) : (
-          <div className="relative flex aspect-video items-center justify-center bg-muted">
-            <Building2 className="h-16 w-16 text-muted-foreground/40" />
-          </div>
-        )}
+        <div className="relative flex aspect-video items-center justify-center bg-muted">
+          <Building2 className="h-16 w-16 text-muted-foreground/40" />
+        </div>
       </CardHeader>
 
       <CardContent className="p-4">

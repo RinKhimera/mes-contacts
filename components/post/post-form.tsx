@@ -19,8 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -32,22 +30,17 @@ import { Textarea } from "@/components/ui/textarea"
 import { categoriesServices, provinces } from "@/constants"
 import { api } from "@/convex/_generated/api"
 import { Doc, Id } from "@/convex/_generated/dataModel"
-import postImagePlaceholder from "@/public/images/post-image-placeholder.jpg"
 import { postSchema } from "@/schemas/post"
-import { checkoutHandler } from "@/server/actions/checkout"
 import { MapboxResponse } from "@/types"
-import { useUploadThing } from "@/utils/uploadthing"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AddressAutofill } from "@mapbox/search-js-react"
 import { useMutation } from "convex/react"
 import { LoaderCircle } from "lucide-react"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
-import { AspectRatio } from "../ui/aspect-ratio"
 
 const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
   const router = useRouter()
@@ -57,12 +50,11 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
   const [postId, setPostId] = useState<Id<"posts">>()
 
   // Convex mutations
-  const createPost = useMutation(api.posts.createPost)
-  const updatePost = useMutation(api.posts.updatePost)
+  const createPost = useMutation(api.posts.create)
+  const updatePost = useMutation(api.posts.update)
 
   const handleAddressSelect = (address: MapboxResponse) => {
     const features = address.features[0]
-    console.log(features)
 
     form.setValue("address", features.properties.full_address)
     form.setValue("city", features.properties.address_level2)
@@ -72,48 +64,10 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
     form.setValue("latitude", features.geometry.coordinates[1])
   }
 
-  const [businessImageStatus, setbusinessImageStatus] = useState<
-    string | undefined
-  >("Non")
-
-  const [files, setFiles] = useState<File[]>([])
-
-  const handleBusinessImageChange = (value: string) => {
-    setbusinessImageStatus(value)
-    // Reset form fields and files when radio selection changes
-    form.setValue("businessImageUrl", undefined)
-    setFiles([])
-  }
-
-  const { startUpload } = useUploadThing("imageUploader", {
-    onClientUploadComplete: (response) => {
-      console.log(response)
-      setFiles([]) // Reset files after upload
-    },
-    onUploadError: (error) => {
-      console.log(error)
-      // alert("error occurred while uploading")
-    },
-    onUploadBegin: (file) => {
-      console.log("upload has begun for", file)
-    },
-    onUploadProgress: (progress) => {
-      console.log(progress)
-    },
-  })
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileList = e.target.files
-    if (fileList) {
-      setFiles(Array.from(fileList))
-    }
-  }
-
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       businessName: post?.businessName || "",
-      businessImageUrl: post?.businessImageUrl || undefined,
       category: post?.category || "",
       description: post?.description || undefined,
       phone: post?.phone || "",
@@ -131,20 +85,10 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     startTransition(async () => {
       try {
-        // Handle file upload first
-        if (files.length > 0) {
-          const res = await startUpload(files)
-          if (res && res[0]) {
-            // Update the form data with the uploaded file URL
-            data.businessImageUrl = res[0].url
-          }
-        }
-
         if (post) {
           await updatePost({
-            postId: post._id,
+            id: post._id,
             businessName: data.businessName,
-            businessImageUrl: data.businessImageUrl,
             category: data.category,
             description: data.description,
             phone: data.phone,
@@ -166,7 +110,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
         } else {
           const newPostId = await createPost({
             businessName: data.businessName,
-            businessImageUrl: data.businessImageUrl,
             category: data.category,
             description: data.description,
             phone: data.phone,
@@ -188,20 +131,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
           // router.push("/dashboard/my-posts")
           toast.success("La publication a été créée avec succès")
         }
-      } catch (error) {
-        console.error(error)
-        toast.error("Une erreur s'est produite !", {
-          description:
-            "Veuillez vérifier votre connexion internet et réessayer. Si le problème persiste, veuillez contacter le support.",
-        })
-      }
-    })
-  }
-
-  const onCheckout = async () => {
-    startTransition(async () => {
-      try {
-        await checkoutHandler(postId!)
       } catch (error) {
         console.error(error)
         toast.error("Une erreur s'est produite !", {
@@ -274,87 +203,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
               </FormItem>
             )}
           />
-
-          {!post ? (
-            <>
-              <Label>
-                Avez-vous une photo ou un logo associé à votre nom commercial ?
-              </Label>
-              <RadioGroup
-                defaultValue={businessImageStatus}
-                onValueChange={handleBusinessImageChange}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Oui" id="yesLogo" />
-                  <Label htmlFor="yesLogo">Oui</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Non" id="noLogo" />
-                  <Label htmlFor="noLogo">Non</Label>
-                </div>
-              </RadioGroup>
-            </>
-          ) : (
-            <>
-              <div>
-                <FormLabel>
-                  Votre photo ou votre logo associé à votre nom commercial
-                </FormLabel>
-                <div className="flex w-[100px] items-center justify-center pt-2">
-                  <AspectRatio ratio={1} className="bg-muted">
-                    <Image
-                      src={post.businessImageUrl || postImagePlaceholder}
-                      alt="Business image"
-                      className="rounded-md object-cover"
-                      fill
-                    />
-                  </AspectRatio>
-                </div>
-              </div>
-
-              <Label>Modifier votre image actuelle ?</Label>
-              <RadioGroup
-                defaultValue={businessImageStatus}
-                onValueChange={handleBusinessImageChange}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Oui" id="yesLogo" />
-                  <Label htmlFor="yesLogo">Oui</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Non" id="noLogo" />
-                  <Label htmlFor="noLogo">Non</Label>
-                </div>
-              </RadioGroup>
-            </>
-          )}
-
-          {businessImageStatus === "Oui" && (
-            <FormField
-              control={form.control}
-              name="businessImageUrl"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel htmlFor="picture">
-                    Chargez le logo ou l&apos;image associée
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="picture"
-                      type="file"
-                      onChange={handleFileChange}
-                      value={undefined}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Votre photo ou votre logo associé à votre nom commercial.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
 
           <FormField
             control={form.control}
@@ -533,32 +381,21 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Finalisez la mise en avant de votre post</DialogTitle>
+            <DialogTitle>Annonce enregistrée avec succès</DialogTitle>
             <DialogDescription>
-              Votre post a été {post ? "mis à jour" : "crée"} avec succès. Vous
-              avez la possibilité de le promouvoir immédiatement en procédant au
-              paiement dès maintenant ou de le régler ultérieurement.
+              Votre annonce a été {post ? "mise à jour" : "créée"} avec succès.
+              Pour la publier, veuillez contacter un administrateur afin de
+              finaliser le paiement.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant={"outline"}
               onClick={(e) => {
                 e.preventDefault()
                 router.push("/dashboard/my-posts")
               }}
-              disabled={isPending}
             >
-              Plus tard
-            </Button>
-            <Button onClick={onCheckout} disabled={isPending}>
-              {isPending ? (
-                <div className="flex items-center">
-                  <LoaderCircle className="mr-1 animate-spin" /> Redirection...
-                </div>
-              ) : (
-                "Payer maintenant"
-              )}
+              Voir mes annonces
             </Button>
           </DialogFooter>
         </DialogContent>

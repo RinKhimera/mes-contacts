@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import type { Doc } from "@/convex/_generated/dataModel"
 import { Building2, Globe, Mail, MapPin, Phone, Share2 } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
 
@@ -37,21 +36,11 @@ export function PostDetailContent({ post }: PostDetailContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Image principale */}
+      {/* Image placeholder - les images sont dans la table media */}
       <div className="relative aspect-video overflow-hidden rounded-lg border bg-muted">
-        {post.businessImageUrl ? (
-          <Image
-            src={post.businessImageUrl}
-            alt={post.businessName}
-            fill
-            className="object-cover"
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Building2 className="h-24 w-24 text-muted-foreground/40 md:h-32 md:w-32" />
-          </div>
-        )}
+        <div className="flex h-full items-center justify-center">
+          <Building2 className="h-24 w-24 text-muted-foreground/40 md:h-32 md:w-32" />
+        </div>
       </div>
 
       {/* En-tête avec titre et badge */}

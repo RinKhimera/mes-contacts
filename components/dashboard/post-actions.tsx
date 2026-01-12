@@ -11,7 +11,6 @@ import { Id } from "@/convex/_generated/dataModel"
 import { Eye, MoreHorizontal, Pencil } from "lucide-react"
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { CheckoutButton } from "./checkout-button"
 import { DeletePostButton } from "./delete-post-button"
 import { SwitchStatusButton } from "./switch-status-button"
 
@@ -84,22 +83,13 @@ export function PostActions({ postId, postStatus }: PostActionsProps) {
                 className="flex w-full cursor-pointer items-center gap-3"
                 onClick={handleItemClick}
               >
-                {postStatus === "DRAFT" ? (
-                  <CheckoutButton
-                    key={`checkout-${key}`}
-                    postId={postId}
-                    variant="menu"
-                    onActionComplete={handleActionComplete}
-                  />
-                ) : (
-                  <SwitchStatusButton
-                    key={`status-${key}`}
-                    postId={postId}
-                    postStatus={postStatus}
-                    variant="menu"
-                    onActionComplete={handleActionComplete}
-                  />
-                )}
+                <SwitchStatusButton
+                  key={`status-${key}`}
+                  postId={postId}
+                  postStatus={postStatus}
+                  variant="menu"
+                  onActionComplete={handleActionComplete}
+                />
               </div>
             </DropdownMenuItem>
 
@@ -139,11 +129,7 @@ export function PostActions({ postId, postStatus }: PostActionsProps) {
           </Link>
         </Button>
 
-        {postStatus === "DRAFT" ? (
-          <CheckoutButton postId={postId} />
-        ) : (
-          <SwitchStatusButton postId={postId} postStatus={postStatus} />
-        )}
+        <SwitchStatusButton postId={postId} postStatus={postStatus} />
 
         <DeletePostButton postId={postId} />
       </div>
