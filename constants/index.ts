@@ -1,15 +1,14 @@
 export const menuItems = [
   // { href: "/", label: "mc.ca" },
   // { href: "/my-contacts", label: "Ma liste de contacts" },
-  { href: "/dashboard/new-post", label: "Nouvelle annonce" },
-  { href: "/dashboard", label: "Mon tableau de bord" },
+  { href: "/recherche", label: "Rechercher" },
   { href: "/login", label: "Connexion" },
   // { href: "/about", label: "A Propos" },
 ]
 
 export const navItems = [
-  { href: "#", label: "Recherche de personnes" },
-  { href: "/dashboard/new-post", label: "Faire une annonce" },
+  { href: "/recherche", label: "Recherche de services" },
+  { href: "/a-propos", label: "À propos" },
 ]
 
 export const listComponents: {
@@ -111,17 +110,25 @@ export const data = {
   ],
   navMain: [
     {
-      title: "Tableau de bord",
+      title: "Administration",
       url: "#",
       isActive: true,
       items: [
         {
-          title: "Mes annonces",
-          url: "/dashboard/my-posts",
+          title: "Tableau de bord",
+          url: "/admin",
         },
         {
-          title: "Nouvelle annonce",
-          url: "/dashboard/new-post",
+          title: "Organisations",
+          url: "/admin/organisations",
+        },
+        {
+          title: "Annonces",
+          url: "/admin/annonces",
+        },
+        {
+          title: "Paiements",
+          url: "/admin/paiements",
         },
       ],
     },

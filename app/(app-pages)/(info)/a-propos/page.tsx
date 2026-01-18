@@ -298,7 +298,7 @@ export default function AProposPage() {
 
             <div className="pt-4">
               <Button asChild size="lg" className="w-full sm:w-auto">
-                <Link href="/dashboard">Publier mon annonce →</Link>
+                <Link href="/contact">Publier une annonce →</Link>
               </Button>
             </div>
           </CardContent>
@@ -349,7 +349,7 @@ export default function AProposPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
-              <Link href="/dashboard">Créer mon annonce</Link>
+              <Link href="/contact">Publier une annonce</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/recherche">Explorer les annonces</Link>

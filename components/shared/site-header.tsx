@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Building2, LayoutDashboard, PlusCircle, Search } from "lucide-react"
+import { Building2, LayoutDashboard, Search } from "lucide-react"
 import Link from "next/link"
 import { MobileMenu } from "./mobile-menu"
 
@@ -34,23 +34,19 @@ export const SiteHeader = () => {
               Rechercher
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/dashboard/new-post" className="gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Nouvelle annonce
-            </Link>
-          </Button>
 
           {isLoading ? (
             <Skeleton className="h-9 w-32" />
           ) : currentUser ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard" className="gap-2">
-                  <LayoutDashboard className="h-4 w-4" />
-                  Tableau de bord
-                </Link>
-              </Button>
+              {currentUser.role === "ADMIN" && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/admin" className="gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Administration
+                  </Link>
+                </Button>
+              )}
             </>
           ) : (
             <>

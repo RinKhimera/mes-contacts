@@ -73,9 +73,9 @@ export function CTASection() {
                 size="lg"
                 className="h-14 gap-2 rounded-xl px-8 text-base font-semibold shadow-lg shadow-primary/20"
               >
-                <Link href="/dashboard/new-post">
+                <Link href="/contact">
                   <Building2 className="h-5 w-5" />
-                  Créer mon annonce
+                  Publier une annonce
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>

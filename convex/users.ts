@@ -89,6 +89,42 @@ export const getCurrentUser = query({
   },
 })
 
+/**
+ * Liste tous les utilisateurs (admin)
+ */
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("users").order("desc").collect()
+  },
+})
+
+/**
+ * Recherche utilisateurs par nom ou email
+ */
+export const search = query({
+  args: { query: v.string() },
+  handler: async (ctx, { query }) => {
+    const allUsers = await ctx.db.query("users").collect()
+    const searchLower = query.toLowerCase()
+    return allUsers.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower)
+    )
+  },
+})
+
+/**
+ * Récupère un utilisateur par son ID
+ */
+export const getById = query({
+  args: { id: v.id("users") },
+  handler: async (ctx, { id }) => {
+    return await ctx.db.get(id)
+  },
+})
+
 // =============================================================================
 // INTERNAL QUERIES/MUTATIONS FOR HTTP ACTIONS
 // =============================================================================

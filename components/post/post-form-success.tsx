@@ -39,7 +39,7 @@ export function PostFormSuccess({
           <Button
             onClick={(e) => {
               e.preventDefault()
-              router.push("/dashboard/my-posts")
+              router.push("/admin/annonces")
             }}
           >
             Voir mes annonces

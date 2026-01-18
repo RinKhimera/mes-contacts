@@ -5,8 +5,7 @@ const footerLinks = {
   services: [
     { label: "Rechercher", href: "/recherche" },
     { label: "Catégories", href: "/categories" },
-    { label: "Nouvelle annonce", href: "/dashboard/new-post" },
-    { label: "Tableau de bord", href: "/dashboard" },
+    { label: "Publier une annonce", href: "/contact" },
   ],
   company: [
     { label: "À propos", href: "/a-propos" },

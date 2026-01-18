@@ -26,8 +26,12 @@ const infoPageTitles: Record<string, string> = {
 
 // Fonction pour obtenir le titre à partir du chemin
 const getTitleFromPath = (path: string): string => {
-  // Tableau de bord est la section parent pour tous les chemins /dashboard/*
-  if (path === "dashboard") return "Tableau de bord"
+  // Admin dashboard
+  if (path === "admin") return "Administration"
+  if (path === "organisations") return "Organisations"
+  if (path === "annonces") return "Annonces"
+  if (path === "paiements") return "Paiements"
+  if (path === "utilisateurs") return "Utilisateurs"
   if (path === "account") return "Compte"
 
   // Vérifier les pages info

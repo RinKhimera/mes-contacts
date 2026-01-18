@@ -11,6 +11,7 @@
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_bunny from "../lib/bunny.js";
 import type * as lib_validation from "../lib/validation.js";
 import type * as media from "../media.js";
 import type * as organizationMembers from "../organizationMembers.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  "lib/bunny": typeof lib_bunny;
   "lib/validation": typeof lib_validation;
   media: typeof media;
   organizationMembers: typeof organizationMembers;

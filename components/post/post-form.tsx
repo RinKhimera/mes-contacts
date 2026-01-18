@@ -104,7 +104,7 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
           if (post.status === "DRAFT") {
             setOpen(true)
             setPostId(post._id)
-          } else router.push("/dashboard/my-posts")
+          } else router.push("/admin/annonces")
 
           toast.success("La publication a été mise à jour avec succès")
         } else {
@@ -128,7 +128,7 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
             setOpen(true)
           }
 
-          // router.push("/dashboard/my-posts")
+          // router.push("/admin/annonces")
           toast.success("La publication a été créée avec succès")
         }
       } catch (error) {
@@ -392,7 +392,7 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
             <Button
               onClick={(e) => {
                 e.preventDefault()
-                router.push("/dashboard/my-posts")
+                router.push("/admin/annonces")
               }}
             >
               Voir mes annonces

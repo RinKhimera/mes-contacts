@@ -12,7 +12,6 @@ import type { Doc } from "@/convex/_generated/dataModel"
 import {
   LayoutDashboard,
   Menu,
-  PlusCircle,
   Search,
   UserCircle,
 } from "lucide-react"
@@ -74,18 +73,11 @@ export const MobileMenu = ({ currentUser, isLoading }: MobileMenuProps) => {
               </Link>
             </Button>
 
-            <Button variant="ghost" className="justify-start gap-3" asChild>
-              <Link href="/dashboard/new-post">
-                <PlusCircle className="h-5 w-5" />
-                Nouvelle annonce
-              </Link>
-            </Button>
-
-            {currentUser && (
+            {currentUser?.role === "ADMIN" && (
               <Button variant="ghost" className="justify-start gap-3" asChild>
-                <Link href="/dashboard">
+                <Link href="/admin">
                   <LayoutDashboard className="h-5 w-5" />
-                  Tableau de bord
+                  Administration
                 </Link>
               </Button>
             )}
