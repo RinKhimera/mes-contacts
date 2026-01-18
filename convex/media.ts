@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { mutation, query } from "./_generated/server"
+import { internalMutation, mutation, query } from "./_generated/server"
 import { requireAdmin } from "./lib/auth"
 import { mediaType } from "./schema"
 
@@ -94,11 +94,12 @@ export const add = mutation({
   args: {
     postId: v.id("posts"),
     url: v.string(),
+    storagePath: v.string(),
     type: mediaType,
     altText: v.optional(v.string()),
     order: v.optional(v.number()),
   },
-  handler: async (ctx, { postId, url, type, altText, order }) => {
+  handler: async (ctx, { postId, url, storagePath, type, altText, order }) => {
     await requireAdmin(ctx)
 
     // Vérifier que le post existe
@@ -120,6 +121,7 @@ export const add = mutation({
     return await ctx.db.insert("media", {
       postId,
       url,
+      storagePath,
       type,
       altText,
       order: finalOrder,
@@ -136,6 +138,7 @@ export const addMultiple = mutation({
     mediaItems: v.array(
       v.object({
         url: v.string(),
+        storagePath: v.string(),
         type: mediaType,
         altText: v.optional(v.string()),
       })
@@ -162,6 +165,7 @@ export const addMultiple = mutation({
       const id = await ctx.db.insert("media", {
         postId,
         url: item.url,
+        storagePath: item.storagePath,
         type: item.type,
         altText: item.altText,
         order: currentOrder++,
@@ -236,6 +240,7 @@ export const reorder = mutation({
 
 /**
  * Supprime un média (Admin only)
+ * Returns storagePath for Bunny CDN cleanup
  */
 export const remove = mutation({
   args: { id: v.id("media") },
@@ -246,6 +251,8 @@ export const remove = mutation({
     if (!media) {
       throw new Error("Média non trouvé")
     }
+
+    const storagePath = media.storagePath
 
     await ctx.db.delete(id)
 
@@ -261,12 +268,13 @@ export const remove = mutation({
       }
     }
 
-    return id
+    return { id, storagePath }
   },
 })
 
 /**
  * Supprime tous les médias d'un post (Admin only)
+ * Returns storagePaths for Bunny CDN cleanup
  */
 export const removeAllForPost = mutation({
   args: { postId: v.id("posts") },
@@ -278,10 +286,87 @@ export const removeAllForPost = mutation({
       .withIndex("by_postId", (q) => q.eq("postId", postId))
       .collect()
 
+    // Filter out undefined storagePaths (legacy records)
+    const storagePaths = allMedia
+      .map((m) => m.storagePath)
+      .filter((path): path is string => path !== undefined)
+
     for (const media of allMedia) {
       await ctx.db.delete(media._id)
     }
 
-    return allMedia.length
+    return { count: allMedia.length, storagePaths }
+  },
+})
+
+// =============================================================================
+// INTERNAL MUTATIONS FOR HTTP ACTIONS
+// =============================================================================
+
+/**
+ * Create media from HTTP upload action
+ */
+export const createFromUpload = internalMutation({
+  args: {
+    postId: v.id("posts"),
+    url: v.string(),
+    storagePath: v.string(),
+    type: mediaType,
+    altText: v.optional(v.string()),
+  },
+  handler: async (ctx, { postId, url, storagePath, type, altText }) => {
+    // Vérifier que le post existe
+    const post = await ctx.db.get(postId)
+    if (!post) {
+      throw new Error("Post non trouvé")
+    }
+
+    // Calculer l'ordre
+    const existingMedia = await ctx.db
+      .query("media")
+      .withIndex("by_postId", (q) => q.eq("postId", postId))
+      .collect()
+    const order = existingMedia.length
+
+    return await ctx.db.insert("media", {
+      postId,
+      url,
+      storagePath,
+      type,
+      altText,
+      order,
+    })
+  },
+})
+
+/**
+ * Delete media and return storagePath for Bunny cleanup (internal)
+ */
+export const deleteAndGetPath = internalMutation({
+  args: { id: v.id("media") },
+  handler: async (ctx, { id }) => {
+    const media = await ctx.db.get(id)
+    if (!media) {
+      return { storagePath: null }
+    }
+
+    const storagePath = media.storagePath
+    const postId = media.postId
+
+    await ctx.db.delete(id)
+
+    // Réorganiser les ordres restants
+    const remainingMedia = await ctx.db
+      .query("media")
+      .withIndex("by_postId_order", (q) => q.eq("postId", postId))
+      .collect()
+
+    for (let i = 0; i < remainingMedia.length; i++) {
+      if (remainingMedia[i].order !== i) {
+        await ctx.db.patch(remainingMedia[i]._id, { order: i })
+      }
+    }
+
+    return { storagePath }
   },
 })

@@ -471,7 +471,8 @@ export const changeStatus = mutation({
 })
 
 /**
- * Supprime un post (Admin only)
+ * Supprime un post et toutes ses données associées (Admin only)
+ * Returns mediaStoragePaths for Bunny CDN cleanup
  */
 export const remove = mutation({
   args: { id: v.id("posts") },
@@ -483,11 +484,16 @@ export const remove = mutation({
       throw new Error("Post non trouvé")
     }
 
-    // Supprimer tous les médias associés
+    // Supprimer tous les médias associés et collecter les storagePaths
     const media = await ctx.db
       .query("media")
       .withIndex("by_postId", (q) => q.eq("postId", id))
       .collect()
+
+    // Filter out undefined storagePaths (legacy records without Bunny paths)
+    const mediaStoragePaths = media
+      .map((m) => m.storagePath)
+      .filter((path): path is string => path !== undefined)
 
     for (const m of media) {
       await ctx.db.delete(m._id)
@@ -516,7 +522,7 @@ export const remove = mutation({
     // Supprimer le post
     await ctx.db.delete(id)
 
-    return id
+    return { id, mediaStoragePaths }
   },
 })
 

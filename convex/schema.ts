@@ -79,6 +79,7 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     image: v.string(),
+    avatarStoragePath: v.optional(v.string()), // Bunny CDN path for cleanup
     tokenIdentifier: v.string(), // Format: "{CLERK_FRONTEND_URL}|{clerk_user_id}"
     externalId: v.optional(v.string()), // Clerk user ID
     role: userRole,
@@ -94,6 +95,7 @@ export default defineSchema({
   organizations: defineTable({
     name: v.string(),
     logo: v.optional(v.string()), // Bunny CDN URL
+    logoStoragePath: v.optional(v.string()), // Bunny CDN path for cleanup
     description: v.optional(v.string()),
     sector: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -181,6 +183,7 @@ export default defineSchema({
   media: defineTable({
     postId: v.id("posts"),
     url: v.string(), // Bunny CDN URL
+    storagePath: v.optional(v.string()), // Bunny Storage path for cleanup (optional for legacy records)
     type: mediaType,
     altText: v.optional(v.string()),
     order: v.number(),

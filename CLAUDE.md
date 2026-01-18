@@ -48,9 +48,11 @@ npx prettier --write .
 
 /convex              # Backend Convex
 ├── schema.ts        # Schéma de données (7 tables)
+├── http.ts          # Routes HTTP (webhooks Clerk, upload Bunny)
 ├── lib/
 │   ├── auth.ts      # Helpers: getCurrentUser, requireAuth, requireAdmin
-│   └── validation.ts # Validation XOR ownership, utilitaires
+│   ├── validation.ts # Validation XOR ownership, utilitaires
+│   └── bunny.ts     # Service Bunny CDN (upload, delete, validation)
 ├── posts.ts         # CRUD annonces (admin-only)
 ├── users.ts         # Sync Clerk → Convex
 ├── organizations.ts # CRUD organisations
@@ -202,16 +204,34 @@ payments.record({
 
 ### Médias (Bunny CDN)
 
+Upload via HTTP actions Convex → Bunny Storage API :
+
 ```typescript
-// Les URLs sont stockées directement (pas d'upload via Convex)
-media.create({
-  postId,
-  url: "https://cdn.bunny.net/...",
-  type: "IMAGE",
-  altText: "Description",
-  order: 0
-})
+// Routes HTTP disponibles (convex/http.ts)
+POST /api/upload/post-media   // Upload image post (admin)
+DELETE /api/upload/post-media // Supprimer image post (admin)
+POST /api/upload/org-logo     // Upload logo organisation (admin)
+POST /api/upload/avatar       // Upload avatar utilisateur (auth)
+
+// Hook frontend pour upload
+import { useBunnyUpload } from "@/hooks"
+
+const { uploadPostMedia, uploadOrgLogo, uploadAvatar, isUploading } = useBunnyUpload()
+
+// Upload image pour un post
+const result = await uploadPostMedia(file, postId, imageIndex)
+// → { success: true, url: "https://cdn.../...", storagePath: "posts/xxx/...", mediaId: "..." }
+
+// Composants d'upload disponibles
+import { ImageUpload } from "@/components/shared/image-upload"   // Multi-images posts
+import { LogoUpload } from "@/components/shared/logo-upload"     // Logo organisation
+import { AvatarUpload } from "@/components/shared/avatar-upload" // Avatar utilisateur
 ```
+
+**Structure de stockage Bunny** :
+- Posts : `posts/{postId}/{timestamp}-{index}.{ext}`
+- Organizations : `organizations/{orgId}/{timestamp}.{ext}`
+- Avatars : `avatars/{userId}/{timestamp}.{ext}`
 
 ### Audit Log
 
@@ -239,17 +259,22 @@ Chaque changement de statut d'un post est automatiquement loggé dans `statusHis
 # Clerk
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
+CLERK_WEBHOOK_SECRET=
 
 # Convex
 NEXT_PUBLIC_CONVEX_URL=
 
 # Mapbox
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+```
 
+### Variables Convex (Dashboard > Settings > Environment Variables)
+
+```env
 # Bunny CDN (pour upload médias)
-BUNNY_API_KEY=
-BUNNY_STORAGE_ZONE=
-BUNNY_CDN_URL=
+BUNNY_STORAGE_ZONE_NAME=mescontacts      # Nom de la Storage Zone
+BUNNY_STORAGE_API_KEY=xxx                # Password de la Storage Zone
+BUNNY_CDN_HOSTNAME=cdn.mescontacts.ca    # Hostname du Pull Zone (sans https://)
 ```
 
 ## Règles de Développement
@@ -284,6 +309,7 @@ Les index principaux pour les requêtes fréquentes :
 - `cmdk` : Command menu (Cmd+K)
 - `date-fns` : Manipulation de dates
 - `lucide-react` : Icônes
+- `react-dropzone` : Drag & drop upload de fichiers
 
 ## Déploiement
 

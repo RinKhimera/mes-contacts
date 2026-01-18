@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { mutation, query } from "./_generated/server"
+import { internalMutation, mutation, query } from "./_generated/server"
 import { requireAdmin, requireAuth } from "./lib/auth"
 
 // =============================================================================
@@ -101,6 +101,7 @@ export const create = mutation({
     name: v.string(),
     ownerId: v.id("users"), // User qui a demandé la création
     logo: v.optional(v.string()),
+    logoStoragePath: v.optional(v.string()),
     description: v.optional(v.string()),
     sector: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -148,6 +149,7 @@ export const update = mutation({
     id: v.id("organizations"),
     name: v.optional(v.string()),
     logo: v.optional(v.string()),
+    logoStoragePath: v.optional(v.string()),
     description: v.optional(v.string()),
     sector: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -187,6 +189,7 @@ export const update = mutation({
 
 /**
  * Supprime une organisation (Admin only)
+ * Returns logoStoragePath for Bunny CDN cleanup
  */
 export const remove = mutation({
   args: { id: v.id("organizations") },
@@ -197,6 +200,8 @@ export const remove = mutation({
     if (!org) {
       throw new Error("Organisation non trouvée")
     }
+
+    const logoStoragePath = org.logoStoragePath
 
     // Supprimer tous les membres
     const members = await ctx.db
@@ -211,7 +216,7 @@ export const remove = mutation({
     // Supprimer l'organisation
     await ctx.db.delete(id)
 
-    return id
+    return { id, logoStoragePath }
   },
 })
 
@@ -236,5 +241,37 @@ export const getMyOrganizations = query({
     )
 
     return organizations.filter(Boolean)
+  },
+})
+
+// =============================================================================
+// INTERNAL MUTATIONS FOR HTTP ACTIONS
+// =============================================================================
+
+/**
+ * Update organization logo (for HTTP actions)
+ */
+export const updateLogoInternal = internalMutation({
+  args: {
+    id: v.id("organizations"),
+    logo: v.string(),
+    logoStoragePath: v.string(),
+  },
+  handler: async (ctx, { id, logo, logoStoragePath }) => {
+    const org = await ctx.db.get(id)
+    if (!org) {
+      throw new Error("Organisation non trouvée")
+    }
+
+    // Return old storage path for cleanup
+    const oldLogoStoragePath = org.logoStoragePath
+
+    await ctx.db.patch(id, {
+      logo,
+      logoStoragePath,
+      updatedAt: Date.now(),
+    })
+
+    return { oldLogoStoragePath }
   },
 })

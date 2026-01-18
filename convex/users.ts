@@ -1,6 +1,11 @@
 import { UserJSON } from "@clerk/backend"
 import { Validator, v } from "convex/values"
-import { QueryCtx, internalMutation, query } from "./_generated/server"
+import {
+  QueryCtx,
+  internalMutation,
+  internalQuery,
+  query,
+} from "./_generated/server"
 
 const userByExternalId = async (ctx: QueryCtx, externalId: string) => {
   return await ctx.db
@@ -81,5 +86,51 @@ export const getCurrentUser = query({
         q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique()
+  },
+})
+
+// =============================================================================
+// INTERNAL QUERIES/MUTATIONS FOR HTTP ACTIONS
+// =============================================================================
+
+/**
+ * Get user by token identifier (for HTTP actions)
+ */
+export const getUserByTokenIdentifier = internalQuery({
+  args: { tokenIdentifier: v.string() },
+  handler: async (ctx, { tokenIdentifier }) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", tokenIdentifier)
+      )
+      .unique()
+  },
+})
+
+/**
+ * Update user avatar (for HTTP actions)
+ */
+export const updateUserAvatar = internalMutation({
+  args: {
+    userId: v.id("users"),
+    avatarUrl: v.string(),
+    avatarStoragePath: v.string(),
+  },
+  handler: async (ctx, { userId, avatarUrl, avatarStoragePath }) => {
+    const user = await ctx.db.get(userId)
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    // Return old storage path for cleanup
+    const oldStoragePath = user.avatarStoragePath
+
+    await ctx.db.patch(userId, {
+      image: avatarUrl,
+      avatarStoragePath,
+    })
+
+    return { oldStoragePath }
   },
 })
