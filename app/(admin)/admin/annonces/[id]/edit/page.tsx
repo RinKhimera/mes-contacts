@@ -61,6 +61,7 @@ export default function EditAnnoncePage() {
       router.push(`/admin/annonces/${id}`)
     } catch (error) {
       toast.error("Erreur lors de la mise à jour")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }

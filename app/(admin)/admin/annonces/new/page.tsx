@@ -57,6 +57,7 @@ export default function NewAnnoncePage() {
       router.push(`/admin/annonces/${postId}`)
     } catch (error) {
       toast.error("Erreur lors de la création")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }

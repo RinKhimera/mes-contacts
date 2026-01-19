@@ -1,17 +1,16 @@
 "use client"
 
 import { useQuery, useMutation } from "convex/react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
+import Image from "next/image"
 import Link from "next/link"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import {
   ArrowLeft,
   Building2,
-  Calendar,
   Clock,
   CreditCard,
-  FileText,
   Globe,
   Mail,
   MapPin,
@@ -25,6 +24,18 @@ import { toast } from "sonner"
 
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
+
+// Types for status badges
+type PostStatus = "DRAFT" | "PUBLISHED" | "EXPIRED" | "DISABLED"
+type PaymentStatus = "PENDING" | "COMPLETED" | "REFUNDED"
+
+// Type for polymorphic owner (user or organization)
+interface OwnerInfo {
+  name: string
+  email: string
+  image?: string | null
+  logo?: string | null
+}
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -43,7 +54,6 @@ import { provinces } from "@/constants"
 
 export default function AnnonceDetailsPage() {
   const params = useParams()
-  const router = useRouter()
   const id = params.id as Id<"posts">
 
   const post = useQuery(api.posts.getByIdWithDetails, { id })
@@ -63,6 +73,7 @@ export default function AnnonceDetailsPage() {
       toast.success("Statut mis à jour")
     } catch (error) {
       toast.error("Erreur lors de la mise à jour")
+      console.error(error)
     } finally {
       setIsChangingStatus(false)
     }
@@ -204,12 +215,14 @@ export default function AnnonceDetailsPage() {
                   {post.media.map((m) => (
                     <div
                       key={m._id}
-                      className="aspect-square overflow-hidden rounded-lg bg-muted"
+                      className="relative aspect-square overflow-hidden rounded-lg bg-muted"
                     >
-                      <img
+                      <Image
                         src={m.url}
                         alt={m.altText || ""}
-                        className="size-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 33vw, 150px"
                       />
                     </div>
                   ))}
@@ -240,11 +253,11 @@ export default function AnnonceDetailsPage() {
                         <div className="flex items-center gap-2">
                           {entry.previousStatus && (
                             <>
-                              <StatusBadge status={entry.previousStatus as any} />
+                              <StatusBadge status={entry.previousStatus as PostStatus} />
                               <span className="text-muted-foreground">→</span>
                             </>
                           )}
-                          <StatusBadge status={entry.newStatus as any} />
+                          <StatusBadge status={entry.newStatus as PostStatus} />
                         </div>
                         {entry.reason && (
                           <p className="mt-1 text-sm text-muted-foreground">
@@ -322,18 +335,18 @@ export default function AnnonceDetailsPage() {
                   <Avatar className="size-10">
                     <AvatarImage
                       src={
-                        post.ownerType === "organization"
-                          ? (post.owner as any).logo
-                          : (post.owner as any).image
+                        (post.ownerType === "organization"
+                          ? (post.owner as OwnerInfo).logo
+                          : (post.owner as OwnerInfo).image) ?? undefined
                       }
                     />
                     <AvatarFallback>
-                      {getInitials((post.owner as any).name)}
+                      {getInitials((post.owner as OwnerInfo).name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{(post.owner as any).name}</p>
+                      <p className="font-medium">{(post.owner as OwnerInfo).name}</p>
                       {post.ownerType === "organization" ? (
                         <Building2 className="size-4 text-muted-foreground" />
                       ) : (
@@ -341,7 +354,7 @@ export default function AnnonceDetailsPage() {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {(post.owner as any).email}
+                      {(post.owner as OwnerInfo).email}
                     </p>
                   </div>
                 </div>
@@ -378,7 +391,7 @@ export default function AnnonceDetailsPage() {
                           {payment.method} - {payment.durationDays} jours
                         </p>
                       </div>
-                      <StatusBadge status={payment.status as any} />
+                      <StatusBadge status={payment.status as PaymentStatus} />
                     </div>
                   ))}
                 </div>

@@ -1,9 +1,9 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
-import { Building2, Loader2, X, Upload } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Building2, Loader2, Upload } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useBunnyUpload } from "@/hooks"
 import { toast } from "sonner"
@@ -84,10 +84,12 @@ export function LogoUpload({
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         ) : logoUrl ? (
           <>
-            <img
+            <Image
               src={logoUrl}
               alt="Logo organisation"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 200px"
             />
             {/* Overlay on hover */}
             <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">

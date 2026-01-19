@@ -5,22 +5,26 @@ import { ClerkProvider, useAuth } from "@clerk/nextjs"
 import { ConvexReactClient } from "convex/react"
 import { ConvexProviderWithClerk } from "convex/react-clerk"
 import { useTheme } from "next-themes"
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useSyncExternalStore } from "react"
 import { getClerkAppearance } from "@/lib/clerk-theme"
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
+// Hydration-safe client detection using useSyncExternalStore
+const emptySubscribe = () => () => {}
+const getClientSnapshot = () => true
+const getServerSnapshot = () => false
+
+function useIsMounted() {
+  return useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot)
+}
+
 function ClerkProviderWithTheme({ children }: { children: ReactNode }) {
   const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  // Éviter les problèmes d'hydratation
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const isMounted = useIsMounted()
 
   // Utiliser le thème dark par défaut pendant le SSR
-  const appearance = getClerkAppearance(mounted ? resolvedTheme : "dark")
+  const appearance = getClerkAppearance(isMounted ? resolvedTheme : "dark")
 
   return (
     <ClerkProvider

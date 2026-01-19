@@ -55,6 +55,7 @@ export default function EditOrganizationPage() {
       router.push(`/admin/organisations/${id}`)
     } catch (error) {
       toast.error("Erreur lors de la mise à jour")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }

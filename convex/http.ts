@@ -2,6 +2,7 @@ import type { WebhookEvent } from "@clerk/backend"
 import { httpRouter } from "convex/server"
 import { Webhook } from "svix"
 import { internal } from "./_generated/api"
+import { Id } from "./_generated/dataModel"
 import { httpAction } from "./_generated/server"
 import {
   deleteFromBunny,
@@ -163,7 +164,7 @@ http.route({
 
       // Create media record in database
       const mediaId = await ctx.runMutation(internal.media.createFromUpload, {
-        postId: postId as any, // Convex ID
+        postId: postId as Id<"posts">,
         url: result.url,
         storagePath: result.storagePath,
         type: "IMAGE",
@@ -214,7 +215,7 @@ http.route({
 
       // Delete from database and get storagePath
       const result = await ctx.runMutation(internal.media.deleteAndGetPath, {
-        id: mediaId as any,
+        id: mediaId as Id<"media">,
       })
 
       // Delete from Bunny CDN
@@ -299,7 +300,7 @@ http.route({
       const updateResult = await ctx.runMutation(
         internal.organizations.updateLogoInternal,
         {
-          id: organizationId as any,
+          id: organizationId as Id<"organizations">,
           logo: result.url,
           logoStoragePath: result.storagePath,
         }

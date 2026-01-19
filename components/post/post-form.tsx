@@ -29,7 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { categoriesServices, provinces } from "@/constants"
 import { api } from "@/convex/_generated/api"
-import { Doc, Id } from "@/convex/_generated/dataModel"
+import { Doc } from "@/convex/_generated/dataModel"
 import { postSchema } from "@/schemas/post"
 import { MapboxResponse } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -47,7 +47,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
-  const [postId, setPostId] = useState<Id<"posts">>()
 
   // Convex mutations
   const createPost = useMutation(api.posts.create)
@@ -103,7 +102,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
           })
           if (post.status === "DRAFT") {
             setOpen(true)
-            setPostId(post._id)
           } else router.push("/admin/annonces")
 
           toast.success("La publication a été mise à jour avec succès")
@@ -124,7 +122,6 @@ const PostForm = ({ post }: { post?: Doc<"posts"> }) => {
           })
 
           if (newPostId) {
-            setPostId(newPostId)
             setOpen(true)
           }
 

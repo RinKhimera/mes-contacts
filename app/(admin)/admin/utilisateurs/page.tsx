@@ -59,7 +59,7 @@ export default function UtilisateursPage() {
       ),
       cell: ({ row }) => {
         const role = row.getValue("role") as string
-        return <StatusBadge status={role as any} />
+        return <StatusBadge status={role as "ADMIN" | "USER"} />
       },
       filterFn: (row, id, value) => value === row.getValue(id),
     },

@@ -1,319 +1,101 @@
 # CLAUDE.md - Mescontacts.ca
 
-## Projet
+Annuaire d'entreprises et services au Canada. Les annonces sont créées et gérées exclusivement par des administrateurs.
 
-Plateforme d'annuaire d'entreprises et services au Canada (mescontacts.ca). Permet aux utilisateurs de publier des annonces de services professionnels avec géolocalisation et recherche avancée. Les annonces sont créées et gérées par des administrateurs.
+## Stack
 
-## Stack Technique
-
-- **Framework**: Next.js 16.1.1 (App Router, Turbopack)
-- **Language**: TypeScript 5 (strict mode)
-- **Backend**: Convex (real-time database, mutations, queries, cron jobs)
-- **Auth**: Clerk (middleware, webhooks, rôles ADMIN/USER)
-- **Paiements**: Manuels par ADMIN (enregistrement dans Convex)
-- **Maps**: Mapbox GL + Search API
-- **UI**: shadcn/ui + Radix UI + TailwindCSS 4
-- **Forms**: React Hook Form + Zod
-- **Médias**: Bunny CDN (URLs externes, multi-médias par annonce)
+Next.js 16 (App Router) · TypeScript · Convex (backend temps réel) · Clerk (auth) · Bunny CDN (médias) · TailwindCSS 4 · shadcn/ui
 
 ## Commandes
 
 ```bash
-# Développement
-npm run dev          # Démarre Next.js + Convex en parallèle
-npx convex dev       # Convex seul (si besoin)
-
-# Build & Lint
-npm run build        # Build production
-npm run lint         # ESLint
-
-# Formatage
-npx prettier --write .
+npm run dev           # Next.js + Convex en parallèle
+npm run build-check   # TypeScript + ESLint (avant commit)
+npm run test          # Vitest
 ```
 
-## Structure du Projet
+## Structure
 
 ```
-/app
-├── (app-pages)/     # Pages publiques (accueil, recherche, annonces)
-├── (dashboard)/     # Pages protégées (dashboard, mes annonces, compte)
-├── (auth)/          # Pages d'authentification Clerk
-└── api/             # Routes API (webhooks)
+app/
+├── (app-pages)/      # Pages publiques
+├── (admin)/admin/    # Dashboard admin (ADMIN only)
+└── api/              # Webhooks Clerk
 
-/components
-├── ui/              # Composants shadcn/ui (32 composants)
-├── dashboard/       # Composants dashboard
-├── post/            # Formulaires d'annonces
-└── shared/          # Header, Footer, composants partagés
+convex/
+├── schema.ts         # Tables et enums (source de vérité)
+├── lib/auth.ts       # getCurrentUser, requireAuth, requireAdmin
+├── lib/validation.ts # validatePostOwnership (XOR logic)
+└── posts.ts          # CRUD annonces
 
-/convex              # Backend Convex
-├── schema.ts        # Schéma de données (7 tables)
-├── http.ts          # Routes HTTP (webhooks Clerk, upload Bunny)
-├── lib/
-│   ├── auth.ts      # Helpers: getCurrentUser, requireAuth, requireAdmin
-│   ├── validation.ts # Validation XOR ownership, utilitaires
-│   └── bunny.ts     # Service Bunny CDN (upload, delete, validation)
-├── posts.ts         # CRUD annonces (admin-only)
-├── users.ts         # Sync Clerk → Convex
-├── organizations.ts # CRUD organisations
-├── organizationMembers.ts # Gestion membres
-├── media.ts         # CRUD médias Bunny CDN
-├── payments.ts      # Enregistrement paiements manuels
-├── statusHistory.ts # Audit log des changements de statut
-└── crons.ts         # Job quotidien d'expiration
+components/
+├── ui/               # shadcn/ui
+├── admin/            # Composants admin
+└── shared/           # Header, Footer, uploads
 
-/schemas             # Schémas Zod de validation
-/constants           # Constantes (catégories, provinces, menus)
-/hooks               # Hooks React personnalisés
-/lib                 # Utilitaires
+schemas/              # Validation Zod (posts, organizations)
+hooks/                # useBunnyUpload, useMapbox, etc.
 ```
 
-## Schéma de Données Convex
+## Règles Critiques
 
-### Tables (7)
+**IMPORTANT - Ownership XOR** : Un post appartient à `userId` OU `organizationId`, jamais les deux. Voir `convex/lib/validation.ts:validatePostOwnership()`.
 
-| Table | Description |
-|-------|-------------|
-| `users` | Utilisateurs synchronisés depuis Clerk |
-| `organizations` | Entreprises/groupes |
-| `organizationMembers` | Table de jonction user ↔ organisation |
-| `posts` | Annonces de services |
-| `media` | Fichiers médias (images, vidéos, documents) |
-| `payments` | Paiements manuels enregistrés |
-| `statusHistory` | Audit log des changements de statut |
+**IMPORTANT - Montants en cents** : Tous les montants sont stockés en cents (5000 = 50.00 CAD). Utiliser `toDollars()` / `toCents()` de `convex/lib/validation.ts`.
 
-### Enums Exportés (convex/schema.ts)
+**IMPORTANT - Pas de `createdAt`** : Convex fournit `_creationTime` automatiquement sur tous les documents.
+
+**IMPORTANT - Permissions** : Toutes les mutations sensibles doivent appeler `requireAdmin(ctx)` de `convex/lib/auth.ts`.
+
+## Cycle de Vie des Annonces
+
+```
+DRAFT → PUBLISHED → EXPIRED → DISABLED
+         ↑ paiement    ↑ cron 5h UTC
+```
+
+1. Admin crée le post → `DRAFT`
+2. Admin enregistre un paiement → `PUBLISHED` + `expiresAt` calculé
+3. Cron job quotidien → `EXPIRED` si dépassé
+4. Admin peut désactiver → `DISABLED`
+
+## Patterns Convex
 
 ```typescript
-// Rôles
-userRole: "ADMIN" | "USER"
-orgMemberRole: "OWNER" | "MEMBER"
+// Auth - convex/lib/auth.ts
+const user = await getCurrentUser(ctx)  // null si non connecté
+const user = await requireAuth(ctx)      // erreur si non connecté
+const admin = await requireAdmin(ctx)    // erreur si non admin
 
-// Statuts
-postStatus: "DRAFT" | "PUBLISHED" | "EXPIRED" | "DISABLED"
-paymentStatus: "PENDING" | "COMPLETED" | "REFUNDED"
-
-// Types
-mediaType: "IMAGE" | "VIDEO" | "DOCUMENT"
-paymentMethod: "CASH" | "E_TRANSFER" | "VIREMENT" | "CARD" | "OTHER"
+// Queries et Mutations
+const posts = useQuery(api.posts.list, { status: "PUBLISHED" })
+const createPost = useMutation(api.posts.create)
 ```
 
-### Ownership XOR
+## Upload Médias
 
-Un post appartient soit à un utilisateur, soit à une organisation, **jamais les deux** :
+Hook `useBunnyUpload` pour tous les uploads vers Bunny CDN :
 
 ```typescript
-// convex/lib/validation.ts
-validatePostOwnership(userId?, organizationId?)
-// Lance une erreur si les deux sont définis ou si aucun n'est défini
+const { uploadPostMedia, uploadOrgLogo, uploadAvatar } = useBunnyUpload()
+await uploadPostMedia(file, postId, imageIndex)
 ```
 
-### System Fields Convex
+Structure stockage : `posts/{postId}/`, `organizations/{orgId}/`, `avatars/{userId}/`
 
-Convex ajoute automatiquement à tous les documents :
-- `_id` : Identifiant unique
-- `_creationTime` : Timestamp de création (ms depuis Unix epoch)
+## Tests
 
-**Ne pas créer de champs `createdAt`** - utiliser `_creationTime` à la place.
-
-## Conventions de Code
-
-### TypeScript
-- Mode strict activé
-- Imports avec alias `@/*` pour la racine
-- Types explicites pour les props de composants
-
-### Composants React
-- Server Components par défaut
-- `"use client"` uniquement si nécessaire (hooks, interactivité)
-- `"use server"` pour les Server Actions
-
-### Styling
-- TailwindCSS utility-first
-- Dark mode supporté via `next-themes`
-- Classes responsive: `hidden md:flex`, `flex md:hidden`
-
-### Formulaires
-- React Hook Form avec Zod resolver
-- Validation: téléphones canadiens, codes postaux CA
-- Pattern: `schemas/post.ts` pour les schémas
-
-### Données Convex
-- Queries pour lecture (`useQuery`)
-- Mutations pour écriture (`useMutation`)
-- Toujours vérifier les permissions avec `requireAdmin()` ou `requireAuth()`
-
-## Patterns Importants
-
-### Authentification
-
-```typescript
-// convex/lib/auth.ts
-import { getCurrentUser, requireAuth, requireAdmin } from "./lib/auth"
-
-// Obtenir l'utilisateur courant (peut être null)
-const user = await getCurrentUser(ctx)
-
-// Exiger une authentification (lance erreur si non connecté)
-const user = await requireAuth(ctx)
-
-// Exiger un admin (lance erreur si non admin)
-const admin = await requireAdmin(ctx)
+```bash
+npm run test              # Tous les tests
+npm run test:coverage     # Avec couverture
 ```
 
-### Annonces (Posts)
+- Tests unitaires : `tests/schemas/` (validation Zod)
+- Tests backend : `tests/convex/` (queries/mutations avec convex-test)
 
-- **Création** : ADMIN uniquement via `posts.create()`
-- **Ownership** : `userId` XOR `organizationId`
-- **Lifecycle** : DRAFT → PUBLISHED → EXPIRED → DISABLED
-- **Publication** : Automatique lors de l'enregistrement d'un paiement
-- **Expiration** : Cron job quotidien à 5h UTC (00h EST)
+## Gotchas
 
-```typescript
-// Cycle de vie d'un post
-1. Admin crée le post → status: DRAFT
-2. Admin enregistre un paiement → status: PUBLISHED, expiresAt calculé
-3. Cron job détecte expiration → status: EXPIRED
-4. Admin peut désactiver manuellement → status: DISABLED
-```
-
-### Paiements Manuels
-
-```typescript
-// convex/payments.ts
-payments.record({
-  postId,
-  amount: 5000,        // En cents (5000 = 50.00 CAD)
-  method: "E_TRANSFER",
-  durationDays: 30,    // Durée de publication
-  notes: "Optionnel"
-})
-// → Enregistre le paiement
-// → Publie automatiquement le post
-// → Calcule expiresAt
-// → Log dans statusHistory
-```
-
-### Organisations
-
-```typescript
-// OWNER peut tout faire sur son organisation
-// MEMBER a un accès en lecture seule
-// Un user peut être membre de plusieurs organisations
-```
-
-### Médias (Bunny CDN)
-
-Upload via HTTP actions Convex → Bunny Storage API :
-
-```typescript
-// Routes HTTP disponibles (convex/http.ts)
-POST /api/upload/post-media   // Upload image post (admin)
-DELETE /api/upload/post-media // Supprimer image post (admin)
-POST /api/upload/org-logo     // Upload logo organisation (admin)
-POST /api/upload/avatar       // Upload avatar utilisateur (auth)
-
-// Hook frontend pour upload
-import { useBunnyUpload } from "@/hooks"
-
-const { uploadPostMedia, uploadOrgLogo, uploadAvatar, isUploading } = useBunnyUpload()
-
-// Upload image pour un post
-const result = await uploadPostMedia(file, postId, imageIndex)
-// → { success: true, url: "https://cdn.../...", storagePath: "posts/xxx/...", mediaId: "..." }
-
-// Composants d'upload disponibles
-import { ImageUpload } from "@/components/shared/image-upload"   // Multi-images posts
-import { LogoUpload } from "@/components/shared/logo-upload"     // Logo organisation
-import { AvatarUpload } from "@/components/shared/avatar-upload" // Avatar utilisateur
-```
-
-**Structure de stockage Bunny** :
-- Posts : `posts/{postId}/{timestamp}-{index}.{ext}`
-- Organizations : `organizations/{orgId}/{timestamp}.{ext}`
-- Avatars : `avatars/{userId}/{timestamp}.{ext}`
-
-### Audit Log
-
-Chaque changement de statut d'un post est automatiquement loggé dans `statusHistory` :
-
-```typescript
-{
-  postId,
-  previousStatus: "DRAFT",
-  newStatus: "PUBLISHED",
-  changedBy: adminId,
-  reason: "Paiement 50.00 CAD - 30 jours",
-  _creationTime: timestamp
-}
-```
-
-### Gestion d'erreurs
-- Composant `error.tsx` global
-- Toast notifications via Sonner
-- Skeleton loaders pour les états de chargement
-
-## Variables d'Environnement Requises
-
-```env
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-CLERK_WEBHOOK_SECRET=
-
-# Convex
-NEXT_PUBLIC_CONVEX_URL=
-
-# Mapbox
-NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-```
-
-### Variables Convex (Dashboard > Settings > Environment Variables)
-
-```env
-# Bunny CDN (pour upload médias)
-BUNNY_STORAGE_ZONE_NAME=mescontacts      # Nom de la Storage Zone
-BUNNY_STORAGE_API_KEY=xxx                # Password de la Storage Zone
-BUNNY_CDN_HOSTNAME=cdn.mescontacts.ca    # Hostname du Pull Zone (sans https://)
-```
-
-## Règles de Développement
-
-1. **Pas de console.log** en production
-2. **Vérifier les permissions** avec `requireAdmin()` pour les mutations sensibles
-3. **Valider côté serveur** toutes les entrées utilisateur
-4. **Ownership XOR** : un post a `userId` OU `organizationId`, jamais les deux
-5. **Imports triés** : tiers → context → utils → hooks → components
-6. **Commits** : messages clairs en anglais
-7. **Utiliser `_creationTime`** au lieu de créer des champs `createdAt`
-
-## Index Convex (37 total)
-
-Les index principaux pour les requêtes fréquentes :
-
-| Table | Index | Usage |
-|-------|-------|-------|
-| posts | `by_status` | Liste par statut |
-| posts | `by_category_province_city` | Recherche géolocalisée |
-| posts | `by_status_expiresAt` | Cron job expiration |
-| payments | `by_postId` | Historique paiements d'un post |
-| statusHistory | `by_postId` | Audit log d'un post |
-| organizations | `by_ownerId` | Organisations d'un user |
-| organizationMembers | `by_userId` | Memberships d'un user |
-
-## Dépendances Clés
-
-- `convex` : Backend as a service, API réactive
-- `@clerk/nextjs` : Auth middleware et composants
-- `sonner` : Toast notifications
-- `cmdk` : Command menu (Cmd+K)
-- `date-fns` : Manipulation de dates
-- `lucide-react` : Icônes
-- `react-dropzone` : Drag & drop upload de fichiers
-
-## Déploiement
-
-- **Hébergement** : Vercel
-- **Base de données** : Convex Cloud
-- **Médias** : Bunny CDN
-- **Domaine** : mescontacts.ca
+- Clerk synchronise les users vers Convex via webhook (`convex/http.ts`)
+- Les enums sont dans `convex/schema.ts` (postStatus, paymentMethod, etc.)
+- Utiliser `<Image>` de Next.js, pas `<img>` natif
+- Variables underscore `_foo` pour les variables intentionnellement non utilisées

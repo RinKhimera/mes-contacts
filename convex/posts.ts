@@ -414,7 +414,7 @@ export const update = mutation({
 
     // Filtrer les champs undefined
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, value]) => value !== undefined)
+      Object.entries(updates).filter(([, value]) => value !== undefined)
     )
 
     await ctx.db.patch(id, {

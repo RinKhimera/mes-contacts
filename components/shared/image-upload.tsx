@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { ImagePlus, X, Loader2, GripVertical } from "lucide-react"
@@ -166,10 +167,12 @@ export function ImageUpload({
               key={image.id || image.url}
               className="relative group aspect-square rounded-lg overflow-hidden bg-muted"
             >
-              <img
+              <Image
                 src={image.url}
                 alt={`Image ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 200px"
               />
               {/* Order badge */}
               {index === 0 && (

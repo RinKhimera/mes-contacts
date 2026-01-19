@@ -50,6 +50,7 @@ export default function NewOrganizationPage() {
       router.push(`/admin/organisations/${orgId}`)
     } catch (error) {
       toast.error("Erreur lors de la création")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }

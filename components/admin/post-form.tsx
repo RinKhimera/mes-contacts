@@ -5,11 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { AddressAutofill } from "@mapbox/search-js-react"
 
 import { api } from "@/convex/_generated/api"
-import { Doc, Id } from "@/convex/_generated/dataModel"
+import { Doc } from "@/convex/_generated/dataModel"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -92,6 +92,7 @@ export function PostForm({ post, onSubmit, isSubmitting }: PostFormProps) {
     },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- React Hook Form's watch() is designed this way
   const ownerType = form.watch("ownerType")
 
   // Set form values when post is loaded

@@ -27,7 +27,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { StatusBadge } from "./status-badge"
 import { ConfirmDialog } from "./confirm-dialog"
 import { getInitials } from "@/lib/utils"
 
@@ -77,6 +76,7 @@ export function MemberManager({ organizationId }: MemberManagerProps) {
       setSearchQuery("")
     } catch (error) {
       toast.error("Erreur lors de l'ajout")
+      console.error(error)
     } finally {
       setIsAdding(false)
     }
@@ -91,6 +91,7 @@ export function MemberManager({ organizationId }: MemberManagerProps) {
       toast.success("Rôle mis à jour")
     } catch (error) {
       toast.error("Erreur lors de la mise à jour")
+      console.error(error)
     }
   }
 
@@ -101,8 +102,9 @@ export function MemberManager({ organizationId }: MemberManagerProps) {
       await removeMember({ membershipId: deleteId })
       toast.success("Membre retiré")
       setDeleteId(null)
-    } catch (error: any) {
-      toast.error(error.message || "Erreur lors de la suppression")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erreur lors de la suppression"
+      toast.error(message)
     } finally {
       setIsDeleting(false)
     }

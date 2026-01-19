@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Bell, ChevronRight, Moon, Search, Sun } from "lucide-react"
@@ -36,7 +37,7 @@ const routeLabels: Record<string, string> = {
 
 export function AdminHeader() {
   const pathname = usePathname()
-  const { setTheme, theme } = useTheme()
+  const { setTheme } = useTheme()
 
   const pathSegments = pathname
     .split("/")
@@ -62,27 +63,29 @@ export function AdminHeader() {
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
             {breadcrumbItems.map((item, index) => (
-              <BreadcrumbItem key={item.href}>
+              <React.Fragment key={item.href}>
                 {index > 0 && (
                   <BreadcrumbSeparator>
                     <ChevronRight className="size-3.5" />
                   </BreadcrumbSeparator>
                 )}
-                {item.isLast ? (
-                  <BreadcrumbPage className="font-medium">
-                    {item.label}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link
-                      href={item.href}
-                      className="text-muted-foreground transition-colors hover:text-foreground"
-                    >
+                <BreadcrumbItem>
+                  {item.isLast ? (
+                    <BreadcrumbPage className="font-medium">
                       {item.label}
-                    </Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href={item.href}
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {item.label}
+                      </Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>

@@ -75,7 +75,7 @@ export const getByLocation = query({
     city: v.optional(v.string()),
   },
   handler: async (ctx, { province, city }) => {
-    let query = ctx.db
+    const query = ctx.db
       .query("organizations")
       .withIndex("by_province_city", (q) => q.eq("province", province))
 

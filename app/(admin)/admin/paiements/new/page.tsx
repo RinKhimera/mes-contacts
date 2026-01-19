@@ -49,6 +49,7 @@ export default function NewPaiementPage() {
       }
     } catch (error) {
       toast.error("Erreur lors de l'enregistrement")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }

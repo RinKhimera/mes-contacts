@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { CreditCard, FileText, Plus } from "lucide-react"
+import { CreditCard, Plus } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -21,7 +21,7 @@ import {
   ConfirmDialog,
   FilterOption,
 } from "@/components/admin"
-import { categoriesServices, provinces } from "@/constants"
+import { categoriesServices } from "@/constants"
 
 export default function AnnoncesPage() {
   const posts = useQuery(api.posts.list, { limit: 1000 })
@@ -40,6 +40,7 @@ export default function AnnoncesPage() {
       setDeleteId(null)
     } catch (error) {
       toast.error("Erreur lors de la suppression")
+      console.error(error)
     } finally {
       setIsDeleting(false)
     }
@@ -54,6 +55,7 @@ export default function AnnoncesPage() {
       toast.success("Statut mis à jour")
     } catch (error) {
       toast.error("Erreur lors de la mise à jour")
+      console.error(error)
     }
   }
 
@@ -112,7 +114,7 @@ export default function AnnoncesPage() {
       ),
       cell: ({ row }) => {
         const status = row.getValue("status") as string
-        return <StatusBadge status={status as any} />
+        return <StatusBadge status={status as "DRAFT" | "PUBLISHED" | "EXPIRED" | "DISABLED"} />
       },
       filterFn: (row, id, value) => value === row.getValue(id),
     },

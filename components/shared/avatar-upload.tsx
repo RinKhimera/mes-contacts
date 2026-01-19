@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { User, Loader2, Camera } from "lucide-react"
@@ -95,10 +96,12 @@ export function AvatarUpload({
           <Loader2 className={cn("animate-spin text-muted-foreground", iconSizeClasses[size])} />
         ) : avatarUrl ? (
           <>
-            <img
+            <Image
               src={avatarUrl}
               alt="Avatar"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 150px"
             />
             {/* Camera overlay on hover */}
             <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">

@@ -7,7 +7,6 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import {
   ArrowLeft,
-  Building2,
   Calendar,
   FileText,
   Globe,

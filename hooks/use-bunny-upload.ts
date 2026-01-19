@@ -3,8 +3,6 @@
 import { useAuth } from "@clerk/nextjs"
 import { useState, useCallback } from "react"
 
-type UploadEndpoint = "post-media" | "org-logo" | "avatar"
-
 interface UploadResult {
   success: boolean
   url?: string

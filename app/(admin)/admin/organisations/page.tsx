@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Building2, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -39,6 +39,7 @@ export default function OrganisationsPage() {
       setDeleteId(null)
     } catch (error) {
       toast.error("Erreur lors de la suppression")
+      console.error(error)
     } finally {
       setIsDeleting(false)
     }

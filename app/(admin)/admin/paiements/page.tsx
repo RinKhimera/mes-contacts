@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Check, CreditCard, Plus, RefreshCw, X } from "lucide-react"
+import { Check, Plus, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -54,6 +54,7 @@ export default function PaiementsPage() {
       setConfirmId(null)
     } catch (error) {
       toast.error("Erreur lors de la confirmation")
+      console.error(error)
     } finally {
       setIsProcessing(false)
     }
@@ -68,6 +69,7 @@ export default function PaiementsPage() {
       setRefundId(null)
     } catch (error) {
       toast.error("Erreur lors du remboursement")
+      console.error(error)
     } finally {
       setIsProcessing(false)
     }
@@ -132,7 +134,7 @@ export default function PaiementsPage() {
       ),
       cell: ({ row }) => {
         const status = row.getValue("status") as string
-        return <StatusBadge status={status as any} />
+        return <StatusBadge status={status as "PENDING" | "COMPLETED" | "REFUNDED"} />
       },
       filterFn: (row, id, value) => value === row.getValue(id),
     },
