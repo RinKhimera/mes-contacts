@@ -161,7 +161,7 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Clerk component */}
-                <SignUp path="/auth/sign-up" forceRedirectUrl="/admin" />
+                <SignUp path="/auth/sign-up" forceRedirectUrl="/auth/callback" />
               </div>
             </motion.div>
 

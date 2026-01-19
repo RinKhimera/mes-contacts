@@ -1,3 +1,5 @@
+"use client"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -10,11 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { Doc } from "@/convex/_generated/dataModel"
-import { SignOutButton } from "@clerk/nextjs"
+import { useClerk } from "@clerk/nextjs"
 import { LogOut, Settings, UserRound } from "lucide-react"
-import Link from "next/link"
 
 export const AvatarDropdown = ({ user }: { user: Doc<"users"> | null }) => {
+  const { signOut, openUserProfile } = useClerk()
   const getInitials = (name: string) => {
     const names = name.split(" ")
     if (names.length >= 2) {
@@ -41,34 +43,37 @@ export const AvatarDropdown = ({ user }: { user: Doc<"users"> | null }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href={"/account"}>
-            <DropdownMenuItem className="cursor-pointer">
-              Compte
-              <DropdownMenuShortcut>
-                <UserRound size={20} />
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => openUserProfile()}
+          >
+            Compte
+            <DropdownMenuShortcut>
+              <UserRound size={20} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
 
-          <Link href={"/account/security"}>
-            <DropdownMenuItem className="cursor-pointer">
-              Paramètres
-              <DropdownMenuShortcut>
-                <Settings size={20} />
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => openUserProfile()}
+          >
+            Paramètres
+            <DropdownMenuShortcut>
+              <Settings size={20} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 
-        <SignOutButton>
-          <DropdownMenuItem className="cursor-pointer">
-            Se déconnecter
-            <DropdownMenuShortcut>
-              <LogOut size={20} />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </SignOutButton>
+        <DropdownMenuItem
+          className="cursor-pointer text-destructive focus:text-destructive"
+          onClick={() => signOut({ redirectUrl: "/" })}
+        >
+          Se déconnecter
+          <DropdownMenuShortcut>
+            <LogOut size={20} />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

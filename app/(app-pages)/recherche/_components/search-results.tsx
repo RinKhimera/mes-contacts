@@ -129,7 +129,7 @@ export const SearchResults = () => {
       : searchParams.get("province") || undefined
   const city = searchParams.get("city") || undefined
 
-  const posts = useQuery(api.posts.searchPostsAdvanced, {
+  const posts = useQuery(api.posts.search, {
     searchTerm,
     category,
     province,

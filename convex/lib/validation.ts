@@ -41,6 +41,16 @@ export function toDollars(cents: number): number {
 }
 
 /**
+ * Valide que la durée de publication est d'au moins 1 jour
+ * @throws Error si durationDays < 1
+ */
+export function validateDurationDays(durationDays: number): void {
+  if (durationDays < 1) {
+    throw new Error("La durée de publication doit être d'au moins 1 jour")
+  }
+}
+
+/**
  * Calcule la date d'expiration à partir de maintenant
  * @param durationDays Nombre de jours de publication
  * @returns Timestamp d'expiration

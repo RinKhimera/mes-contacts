@@ -1,5 +1,4 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
 
 const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
@@ -8,16 +7,8 @@ const isProtectedRoute = createRouteMatcher([
   "/payment-status(.*)",
 ])
 
-const isPublicRoute = createRouteMatcher(["/"])
-
 export const proxy = clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth()
-
-  // Si l'utilisateur est connecté et tente d'accéder aux pages vitrine
-  if (userId && isPublicRoute(req)) {
-    return NextResponse.redirect(new URL("/admin", req.url))
-  }
-
+  // Protège les routes admin/dashboard - redirige vers sign-in si non connecté
   if (isProtectedRoute(req)) await auth.protect()
 })
 

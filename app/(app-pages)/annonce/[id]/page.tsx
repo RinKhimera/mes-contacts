@@ -79,7 +79,7 @@ const AnnonceDetailsPage = ({
 }) => {
   const { id } = use(params)
   const postId = id as Id<"posts">
-  const post = useQuery(api.posts.getPostById, { postId })
+  const post = useQuery(api.posts.getById, { id: postId })
 
   // Loading state
   if (post === undefined) {

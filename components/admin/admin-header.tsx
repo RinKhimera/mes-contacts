@@ -5,7 +5,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Bell, ChevronRight, Moon, Search, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useQuery } from "convex/react"
 
+import { api } from "@/convex/_generated/api"
+import { Id } from "@/convex/_generated/dataModel"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
@@ -35,6 +38,11 @@ const routeLabels: Record<string, string> = {
   edit: "Modifier",
 }
 
+// Convex IDs are alphanumeric strings of ~32 characters
+function isConvexId(segment: string): boolean {
+  return /^[a-z0-9]{20,40}$/.test(segment)
+}
+
 export function AdminHeader() {
   const pathname = usePathname()
   const { setTheme } = useTheme()
@@ -44,10 +52,28 @@ export function AdminHeader() {
     .filter(Boolean)
     .filter((segment) => !segment.startsWith("["))
 
+  // Detect post ID in the path (e.g., /admin/annonces/[id])
+  const annonceIndex = pathSegments.indexOf("annonces")
+  const postIdSegment = annonceIndex !== -1 ? pathSegments[annonceIndex + 1] : null
+  const postId = postIdSegment && isConvexId(postIdSegment) ? postIdSegment : null
+
+  // Fetch post name if we have a post ID
+  const post = useQuery(
+    api.posts.getById,
+    postId ? { id: postId as Id<"posts"> } : "skip"
+  )
+
   const breadcrumbItems = pathSegments.map((segment, index) => {
     const href = "/" + pathSegments.slice(0, index + 1).join("/")
     const isLast = index === pathSegments.length - 1
-    const label = routeLabels[segment] || segment
+
+    // Use businessName for post IDs
+    let label = routeLabels[segment] || segment
+    if (segment === postId && post) {
+      label = post.businessName
+    } else if (segment === postId && !post) {
+      label = "Chargement..."
+    }
 
     return { href, label, isLast }
   })

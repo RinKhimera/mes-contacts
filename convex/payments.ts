@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { requireAdmin } from "./lib/auth"
-import { calculateExpiresAt } from "./lib/validation"
+import { calculateExpiresAt, validateDurationDays } from "./lib/validation"
 import { paymentMethod, paymentStatus } from "./schema"
 
 // =============================================================================
@@ -176,6 +176,7 @@ export const record = mutation({
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx)
+    validateDurationDays(args.durationDays)
 
     const post = await ctx.db.get(args.postId)
     if (!post) {
@@ -237,6 +238,7 @@ export const recordPending = mutation({
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx)
+    validateDurationDays(args.durationDays)
 
     const post = await ctx.db.get(args.postId)
     if (!post) {
@@ -396,6 +398,7 @@ export const renew = mutation({
   },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx)
+    validateDurationDays(args.durationDays)
 
     const post = await ctx.db.get(args.postId)
     if (!post) {

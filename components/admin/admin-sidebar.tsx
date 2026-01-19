@@ -12,6 +12,9 @@ import {
   Users,
 } from "lucide-react"
 import { useClerk } from "@clerk/nextjs"
+import { useQuery } from "convex/react"
+
+import { api } from "@/convex/_generated/api"
 
 import {
   Sidebar,
@@ -70,7 +73,11 @@ const navigationItems = [
 export function AdminSidebar() {
   const pathname = usePathname()
   const { currentUser } = useCurrentUser()
-  const { signOut } = useClerk()
+  const { signOut, openUserProfile } = useClerk()
+
+  // Fetch counts for quick stats
+  const posts = useQuery(api.posts.list, {})
+  const organizations = useQuery(api.organizations.list, {})
 
   const isActive = (item: (typeof navigationItems)[0]) => {
     if (item.exact) {
@@ -145,12 +152,12 @@ export function AdminSidebar() {
             <div className="grid grid-cols-2 gap-2 px-2">
               <QuickStatCard
                 label="Annonces"
-                value="—"
+                value={posts?.length?.toString() ?? "—"}
                 color="amber"
               />
               <QuickStatCard
                 label="Orgs"
-                value="—"
+                value={organizations?.length?.toString() ?? "—"}
                 color="green"
               />
             </div>
@@ -166,7 +173,7 @@ export function AdminSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="size-8 rounded-lg ring-2 ring-primary/20">
                     <AvatarImage
@@ -193,11 +200,12 @@ export function AdminSidebar() {
                 align="start"
                 sideOffset={8}
               >
-                <DropdownMenuItem asChild>
-                  <Link href="/account" className="cursor-pointer">
-                    <Settings className="mr-2 size-4" />
-                    Paramètres
-                  </Link>
+                <DropdownMenuItem
+                  onClick={() => openUserProfile()}
+                  className="cursor-pointer"
+                >
+                  <Settings className="mr-2 size-4" />
+                  Paramètres
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

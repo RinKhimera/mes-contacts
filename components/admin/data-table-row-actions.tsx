@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -30,6 +31,9 @@ export function DataTableRowActions({
   onDelete,
   extraActions,
 }: DataTableRowActionsProps) {
+  const hasNavigationActions = viewHref || editHref
+  const hasExtraActions = extraActions && extraActions.length > 0
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +45,10 @@ export function DataTableRowActions({
           <span className="sr-only">Menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[160px]">
+      <DropdownMenuContent align="end" className="min-w-[180px]">
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+          Actions
+        </DropdownMenuLabel>
         {viewHref && (
           <DropdownMenuItem asChild>
             <Link href={viewHref} className="cursor-pointer">
@@ -58,6 +65,7 @@ export function DataTableRowActions({
             </Link>
           </DropdownMenuItem>
         )}
+        {hasNavigationActions && hasExtraActions && <DropdownMenuSeparator />}
         {extraActions?.map((action, index) => (
           <DropdownMenuItem
             key={index}

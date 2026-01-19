@@ -100,8 +100,8 @@
   --chart-1: oklch(0.55 0.22 25);
   --chart-2: oklch(0.45 0.12 155);
   --chart-3: oklch(0.65 0.18 55);
-  --chart-4: oklch(0.70 0.14 200);
-  --chart-5: oklch(0.60 0.16 85);
+  --chart-4: oklch(0.7 0.14 200);
+  --chart-5: oklch(0.6 0.16 85);
   --sidebar: oklch(0.97 0.005 85);
   --sidebar-foreground: oklch(0.18 0.02 45);
   --sidebar-primary: oklch(0.65 0.18 55);
@@ -138,7 +138,7 @@
   --chart-1: oklch(0.65 0.2 25);
   --chart-2: oklch(0.55 0.1 155);
   --chart-3: oklch(0.75 0.16 65);
-  --chart-4: oklch(0.60 0.12 200);
+  --chart-4: oklch(0.6 0.12 200);
   --chart-5: oklch(0.55 0.14 85);
   --sidebar: oklch(0.16 0.02 155);
   --sidebar-foreground: oklch(0.95 0.008 85);
@@ -182,8 +182,12 @@
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scale-in {
@@ -209,8 +213,13 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .animate-fade-up {
@@ -239,7 +248,7 @@
 
 /* Noise texture overlay */
 .noise-overlay::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
@@ -283,11 +292,27 @@
 }
 
 /* Stagger delays */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
-.delay-600 { animation-delay: 600ms; }
-.delay-700 { animation-delay: 700ms; }
-.delay-800 { animation-delay: 800ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}
+.delay-400 {
+  animation-delay: 400ms;
+}
+.delay-500 {
+  animation-delay: 500ms;
+}
+.delay-600 {
+  animation-delay: 600ms;
+}
+.delay-700 {
+  animation-delay: 700ms;
+}
+.delay-800 {
+  animation-delay: 800ms;
+}

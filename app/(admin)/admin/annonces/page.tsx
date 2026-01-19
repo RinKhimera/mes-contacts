@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { CreditCard, Plus } from "lucide-react"
+import { Ban, CreditCard, Plus, RotateCcw, Send } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -171,6 +171,7 @@ export default function AnnoncesPage() {
                 ? [
                     {
                       label: "Publier",
+                      icon: <Send className="size-4" />,
                       onClick: () => handleStatusChange(post._id, "PUBLISHED"),
                     },
                   ]
@@ -179,6 +180,7 @@ export default function AnnoncesPage() {
                 ? [
                     {
                       label: "Désactiver",
+                      icon: <Ban className="size-4" />,
                       onClick: () => handleStatusChange(post._id, "DISABLED"),
                       variant: "destructive" as const,
                     },
@@ -188,6 +190,7 @@ export default function AnnoncesPage() {
                 ? [
                     {
                       label: "Réactiver",
+                      icon: <RotateCcw className="size-4" />,
                       onClick: () => handleStatusChange(post._id, "PUBLISHED"),
                     },
                   ]

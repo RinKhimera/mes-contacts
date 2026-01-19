@@ -163,7 +163,7 @@ export default function SignInPage() {
                 </div>
 
                 {/* Clerk component */}
-                <SignIn path="/auth/sign-in" forceRedirectUrl="/admin" />
+                <SignIn path="/auth/sign-in" forceRedirectUrl="/auth/callback" />
               </div>
             </motion.div>
 
