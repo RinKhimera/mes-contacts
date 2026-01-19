@@ -4,16 +4,28 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import type { Doc } from "@/convex/_generated/dataModel"
+import { ImageGallery } from "@/components/shared/image-gallery"
+import { api } from "@/convex/_generated/api"
+import type { Doc, Id } from "@/convex/_generated/dataModel"
+import { useQuery } from "convex/react"
 import { Building2, Globe, Mail, MapPin, Phone, Share2 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 
 type PostDetailContentProps = {
   post: Doc<"posts">
+  postId: Id<"posts">
 }
 
-export function PostDetailContent({ post }: PostDetailContentProps) {
+export function PostDetailContent({ post, postId }: PostDetailContentProps) {
+  const media = useQuery(api.media.getByPost, { postId })
+
+  // Transform media to gallery format
+  const galleryImages = media?.map((m) => ({
+    url: m.url,
+    alt: post.businessName,
+  })) || []
+
   const handleShare = async () => {
     const url = window.location.href
     const title = post.businessName
@@ -36,12 +48,8 @@ export function PostDetailContent({ post }: PostDetailContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Image placeholder - les images sont dans la table media */}
-      <div className="relative aspect-video overflow-hidden rounded-lg border bg-muted">
-        <div className="flex h-full items-center justify-center">
-          <Building2 className="h-24 w-24 text-muted-foreground/40 md:h-32 md:w-32" />
-        </div>
-      </div>
+      {/* Image Gallery */}
+      <ImageGallery images={galleryImages} businessName={post.businessName} />
 
       {/* En-tête avec titre et badge */}
       <div>

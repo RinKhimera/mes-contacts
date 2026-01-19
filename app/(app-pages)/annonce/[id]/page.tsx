@@ -10,7 +10,7 @@ import { AlertCircle, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { use } from "react"
 import { PostDetailContent } from "./_components/post-detail-content"
-import { PostDetailMap } from "./_components/post-detail-map"
+import { LocationMap } from "@/components/shared/location-map"
 
 const LoadingSkeleton = () => {
   return (
@@ -158,15 +158,17 @@ const AnnonceDetailsPage = ({
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Colonne gauche - Détails */}
         <div>
-          <PostDetailContent post={post} />
+          <PostDetailContent post={post} postId={postId} />
         </div>
 
         {/* Colonne droite - Carte */}
         <div className="lg:sticky lg:top-20 lg:self-start">
-          <PostDetailMap
+          <LocationMap
             longitude={post.geo?.longitude}
             latitude={post.geo?.latitude}
             businessName={post.businessName}
+            variant="detail"
+            showLabel
           />
         </div>
       </div>

@@ -1,15 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useQuery } from "convex/react"
-import { Loader2 } from "lucide-react"
-import { useEffect } from "react"
+import { ImagePlus, Loader2 } from "lucide-react"
 import { AddressAutofill } from "@mapbox/search-js-react"
 
 import { api } from "@/convex/_generated/api"
-import { Doc } from "@/convex/_generated/dataModel"
+import { Doc, Id } from "@/convex/_generated/dataModel"
+import { LocationMap } from "@/components/shared/location-map"
+import { ImageUpload } from "@/components/shared/image-upload"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -63,13 +65,47 @@ type PostFormValues = z.infer<typeof postFormSchema>
 
 interface PostFormProps {
   post?: Doc<"posts">
+  postId?: Id<"posts">
   onSubmit: (values: PostFormValues) => Promise<void>
   isSubmitting: boolean
 }
 
-export function PostForm({ post, onSubmit, isSubmitting }: PostFormProps) {
+export function PostForm({ post, postId, onSubmit, isSubmitting }: PostFormProps) {
   const users = useQuery(api.users.list)
   const organizations = useQuery(api.organizations.list)
+  const existingMedia = useQuery(
+    api.media.getByPost,
+    postId ? { postId } : "skip"
+  )
+
+  // Transform media to ImageUpload format
+  const existingImages = existingMedia?.map((m) => ({
+    id: m._id,
+    url: m.url,
+    storagePath: m.storagePath,
+    order: m.order,
+  })) || []
+
+  // Build form values from post if editing
+  const postValues = post
+    ? {
+        ownerType: (post.organizationId ? "organization" : "user") as "user" | "organization",
+        userId: post.userId || "",
+        organizationId: post.organizationId || "",
+        businessName: post.businessName,
+        category: post.category,
+        description: post.description || "",
+        phone: post.phone,
+        email: post.email,
+        website: post.website || "",
+        address: post.address,
+        city: post.city,
+        province: post.province,
+        postalCode: post.postalCode,
+        longitude: post.geo?.longitude,
+        latitude: post.geo?.latitude,
+      }
+    : undefined
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
@@ -92,31 +128,15 @@ export function PostForm({ post, onSubmit, isSubmitting }: PostFormProps) {
     },
   })
 
+  // Track if we've synced with post data (React pattern: sync during render)
+  const [syncedPostId, setSyncedPostId] = useState<string | undefined>(undefined)
+  if (post && post._id !== syncedPostId) {
+    setSyncedPostId(post._id)
+    form.reset(postValues)
+  }
+
   // eslint-disable-next-line react-hooks/incompatible-library -- React Hook Form's watch() is designed this way
   const ownerType = form.watch("ownerType")
-
-  // Set form values when post is loaded
-  useEffect(() => {
-    if (post) {
-      form.reset({
-        ownerType: post.organizationId ? "organization" : "user",
-        userId: post.userId || "",
-        organizationId: post.organizationId || "",
-        businessName: post.businessName,
-        category: post.category,
-        description: post.description || "",
-        phone: post.phone,
-        email: post.email,
-        website: post.website || "",
-        address: post.address,
-        city: post.city,
-        province: post.province,
-        postalCode: post.postalCode,
-        longitude: post.geo?.longitude,
-        latitude: post.geo?.latitude,
-      })
-    }
-  }, [post, form])
 
   const handleAddressSelect = (address: MapboxResponse) => {
     const features = address.features[0]
@@ -408,6 +428,38 @@ export function PostForm({ post, onSubmit, isSubmitting }: PostFormProps) {
               )}
             />
           </div>
+        </div>
+
+        {/* Map Preview */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Apercu de la localisation</h3>
+          <LocationMap
+            longitude={form.watch("longitude")}
+            latitude={form.watch("latitude")}
+            businessName={form.watch("businessName")}
+            variant="preview"
+            showLabel={false}
+          />
+        </div>
+
+        {/* Images Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Images</h3>
+          {postId ? (
+            <ImageUpload
+              postId={postId}
+              existingImages={existingImages}
+              maxImages={5}
+              disabled={isSubmitting}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6">
+              <ImagePlus className="size-8 text-muted-foreground/50" />
+              <p className="text-center text-sm text-muted-foreground">
+                Enregistrez l&apos;annonce pour ajouter des images
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Submit */}

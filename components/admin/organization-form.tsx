@@ -4,11 +4,12 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useQuery } from "convex/react"
-import { Loader2 } from "lucide-react"
+import { Building2, Loader2 } from "lucide-react"
 import { useEffect } from "react"
 
 import { api } from "@/convex/_generated/api"
-import { Doc } from "@/convex/_generated/dataModel"
+import { Doc, Id } from "@/convex/_generated/dataModel"
+import { LogoUpload } from "@/components/shared/logo-upload"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -48,6 +49,7 @@ type OrganizationFormValues = z.infer<typeof organizationSchema>
 
 interface OrganizationFormProps {
   organization?: Doc<"organizations">
+  organizationId?: Id<"organizations">
   onSubmit: (values: OrganizationFormValues) => Promise<void>
   isSubmitting: boolean
 }
@@ -68,6 +70,7 @@ const sectors = [
 
 export function OrganizationForm({
   organization,
+  organizationId,
   onSubmit,
   isSubmitting,
 }: OrganizationFormProps) {
@@ -116,6 +119,27 @@ export function OrganizationForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        {/* Logo Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Logo</h3>
+          {organizationId ? (
+            <LogoUpload
+              organizationId={organizationId}
+              currentLogo={organization?.logo}
+              disabled={isSubmitting}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex size-32 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25">
+                <Building2 className="size-8 text-muted-foreground/50" />
+              </div>
+              <p className="max-w-[200px] text-center text-xs text-muted-foreground">
+                Enregistrez l&apos;organisation pour ajouter un logo
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Basic Info */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Informations générales</h3>

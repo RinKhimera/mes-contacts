@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation } from "convex/react"
 import { useParams } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -17,7 +16,6 @@ import {
   Pencil,
   Phone,
   User,
-  Image as ImageIcon,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -49,6 +47,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { StatusBadge } from "@/components/admin"
+import { LocationMap } from "@/components/shared/location-map"
+import { ImageGallery } from "@/components/shared/image-gallery"
 import { getInitials } from "@/lib/utils"
 import { provinces } from "@/constants"
 
@@ -204,35 +204,32 @@ export default function AnnonceDetailsPage() {
             </CardContent>
           </Card>
 
+          {/* Location Map */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Localisation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LocationMap
+                longitude={post.geo?.longitude}
+                latitude={post.geo?.latitude}
+                businessName={post.businessName}
+                variant="detail"
+                showLabel
+              />
+            </CardContent>
+          </Card>
+
           {/* Media Gallery */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Médias</CardTitle>
             </CardHeader>
             <CardContent>
-              {post.media && post.media.length > 0 ? (
-                <div className="grid grid-cols-3 gap-4">
-                  {post.media.map((m) => (
-                    <div
-                      key={m._id}
-                      className="relative aspect-square overflow-hidden rounded-lg bg-muted"
-                    >
-                      <Image
-                        src={m.url}
-                        alt={m.altText || ""}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 33vw, 150px"
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
-                  <ImageIcon className="size-8" />
-                  <p className="text-sm">Aucun média</p>
-                </div>
-              )}
+              <ImageGallery
+                images={post.media?.map((m) => ({ url: m.url, alt: m.altText || post.businessName })) || []}
+                businessName={post.businessName}
+              />
             </CardContent>
           </Card>
 

@@ -1,5 +1,7 @@
 import { categoriesServices } from "@/constants"
 import {
+  BookOpen,
+  Brain,
   Briefcase,
   Building2,
   ChevronRight,
@@ -56,6 +58,16 @@ const categoryData: Record<
     color: "text-teal-600 dark:text-teal-400",
     bgColor: "bg-teal-100 dark:bg-teal-950",
   },
+  Tutorat: {
+    icon: <BookOpen className="h-6 w-6" />,
+    color: "text-indigo-600 dark:text-indigo-400",
+    bgColor: "bg-indigo-100 dark:bg-indigo-950",
+  },
+  Psychothérapie: {
+    icon: <Brain className="h-6 w-6" />,
+    color: "text-pink-600 dark:text-pink-400",
+    bgColor: "bg-pink-100 dark:bg-pink-950",
+  },
 }
 
 const categoryDescriptions: Record<string, string> = {
@@ -67,6 +79,8 @@ const categoryDescriptions: Record<string, string> = {
   "Courtier Immobilier": "Achat, vente et location",
   Assurance: "Protection et couverture",
   "Association Communautaire": "Services communautaires",
+  Tutorat: "Aide scolaire et académique",
+  Psychothérapie: "Santé mentale et bien-être",
 }
 
 export function CategoryGrid() {
@@ -92,8 +106,8 @@ export function CategoryGrid() {
         </div>
 
         {/* Bento grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
-          {categoriesServices.slice(0, 8).map((category, index) => {
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-3">
+          {categoriesServices.slice(0, 10).map((category, index) => {
             const data = categoryData[category] || {
               icon: <Briefcase className="h-6 w-6" />,
               color: "text-primary",

@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs"
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.mescontacts.ca",
+      },
+      {
+        protocol: "https",
+        hostname: "mescontacts.b-cdn.net",
       },
     ],
   },
@@ -53,4 +57,4 @@ export default withSentryConfig(nextConfig, {
       removeDebugLogging: true,
     },
   },
-});
+})

@@ -4,10 +4,17 @@ import Image from "next/image"
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { ImagePlus, X, Loader2, GripVertical } from "lucide-react"
+import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import Lightbox from "yet-another-react-lightbox"
+import "yet-another-react-lightbox/styles.css"
+import { useMutation } from "convex/react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useBunnyUpload } from "@/hooks"
 import { toast } from "sonner"
+import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
 
 interface UploadedImage {
@@ -25,6 +32,79 @@ interface ImageUploadProps {
   disabled?: boolean
 }
 
+// Sortable image item component
+interface SortableImageProps {
+  image: UploadedImage
+  index: number
+  onRemove: (index: number) => void
+  onImageClick: (index: number) => void
+  isUploading: boolean
+}
+
+function SortableImage({ image, index, onRemove, onImageClick, isUploading }: SortableImageProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: image.id || image.url })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "relative group aspect-square rounded-lg overflow-hidden bg-muted",
+        isDragging && "opacity-50 ring-2 ring-primary"
+      )}
+    >
+      <Image
+        src={image.url}
+        alt={`Image ${index + 1}`}
+        fill
+        className="object-cover cursor-pointer"
+        sizes="(max-width: 768px) 50vw, 200px"
+        onClick={() => onImageClick(index)}
+      />
+      {/* Order badge */}
+      {index === 0 && (
+        <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded pointer-events-none">
+          Principale
+        </span>
+      )}
+      {/* Delete button */}
+      <Button
+        type="button"
+        variant="destructive"
+        size="icon"
+        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => {
+          e.stopPropagation()
+          onRemove(index)
+        }}
+        disabled={isUploading}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+      {/* Drag handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-1 rounded bg-black/30 hover:bg-black/50"
+      >
+        <GripVertical className="h-5 w-5 text-white drop-shadow-md" />
+      </div>
+    </div>
+  )
+}
+
 export function ImageUpload({
   postId,
   existingImages = [],
@@ -34,7 +114,29 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [images, setImages] = useState<UploadedImage[]>(existingImages)
   const [uploadingCount, setUploadingCount] = useState(0)
+  const [lightboxIndex, setLightboxIndex] = useState(-1)
   const { uploadPostMedia, deletePostMedia, isUploading } = useBunnyUpload()
+  const reorderMedia = useMutation(api.media.reorder)
+
+  // DnD sensors with activation constraint to prevent accidental drags
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
+
+  // Track previous existingImages to detect when async data loads
+  const [prevExistingImages, setPrevExistingImages] = useState(existingImages)
+
+  // Sync during render when existingImages prop changes (React recommended pattern)
+  if (existingImages.length > 0 && existingImages !== prevExistingImages) {
+    setPrevExistingImages(existingImages)
+    if (images.length === 0) {
+      setImages(existingImages)
+    }
+  }
 
   const updateImages = useCallback(
     (newImages: UploadedImage[]) => {
@@ -42,6 +144,39 @@ export function ImageUpload({
       onImagesChange?.(newImages)
     },
     [onImagesChange]
+  )
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+
+      const oldIndex = images.findIndex((img) => (img.id || img.url) === active.id)
+      const newIndex = images.findIndex((img) => (img.id || img.url) === over.id)
+
+      if (oldIndex === -1 || newIndex === -1) return
+
+      const reordered = arrayMove(images, oldIndex, newIndex)
+        .map((img, i) => ({ ...img, order: i }))
+
+      // Update local state immediately for responsiveness
+      updateImages(reordered)
+
+      // Persist to database
+      const mediaIds = reordered
+        .filter((img) => img.id)
+        .map((img) => img.id as Id<"media">)
+
+      if (mediaIds.length > 0) {
+        try {
+          await reorderMedia({ postId, mediaIds })
+        } catch (error) {
+          console.error("Failed to reorder media:", error)
+          toast.error("Erreur lors de la réorganisation")
+        }
+      }
+    },
+    [images, updateImages, reorderMedia, postId]
   )
 
   const onDrop = useCallback(
@@ -159,51 +294,45 @@ export function ImageUpload({
         </div>
       </div>
 
-      {/* Image Grid */}
+      {/* Image Grid with DnD */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {images.map((image, index) => (
-            <div
-              key={image.id || image.url}
-              className="relative group aspect-square rounded-lg overflow-hidden bg-muted"
-            >
-              <Image
-                src={image.url}
-                alt={`Image ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 200px"
-              />
-              {/* Order badge */}
-              {index === 0 && (
-                <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded">
-                  Principale
-                </span>
-              )}
-              {/* Delete button */}
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => removeImage(index)}
-                disabled={isUploading}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-              {/* Drag handle (for future reordering) */}
-              <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <GripVertical className="h-5 w-5 text-white drop-shadow-md" />
-              </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={images.map((img) => img.id || img.url)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {images.map((image, index) => (
+                <SortableImage
+                  key={image.id || image.url}
+                  image={image}
+                  index={index}
+                  onRemove={removeImage}
+                  onImageClick={setLightboxIndex}
+                  isUploading={isUploading}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Counter */}
       <p className="text-xs text-muted-foreground text-right">
         {images.length} / {maxImages} images
       </p>
+
+      {/* Lightbox */}
+      <Lightbox
+        open={lightboxIndex >= 0}
+        close={() => setLightboxIndex(-1)}
+        index={lightboxIndex}
+        slides={images.map((img) => ({ src: img.url }))}
+      />
     </div>
   )
 }

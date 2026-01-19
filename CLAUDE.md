@@ -93,9 +93,83 @@ npm run test:coverage     # Avec couverture
 - Tests unitaires : `tests/schemas/` (validation Zod)
 - Tests backend : `tests/convex/` (queries/mutations avec convex-test)
 
+## Patterns React
+
+### Sync props vers state (pas de useEffect)
+
+**IMPORTANT** : Ne jamais utiliser `useEffect` pour synchroniser des props vers le state. Utiliser le pattern React recommandé :
+
+```typescript
+// ❌ Anti-pattern (cause des rendus en cascade)
+useEffect(() => {
+  if (data) setLocalState(data)
+}, [data])
+
+// ✅ Pattern recommandé (sync pendant le rendu)
+const [prevData, setPrevData] = useState(data)
+if (data !== prevData) {
+  setPrevData(data)
+  setLocalState(data)
+}
+```
+
+Voir : https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+
+### react-hook-form avec données async et Select
+
+**IMPORTANT** : L'option `values` de react-hook-form ne fonctionne pas bien avec les Select de Radix/shadcn (ils peuvent appeler `onChange("")` au montage). Utiliser `form.reset()` avec le pattern de sync pendant le rendu :
+
+```typescript
+const form = useForm({
+  defaultValues: { ...emptyDefaults },
+})
+
+// Sync avec form.reset() quand les données async arrivent
+const [syncedId, setSyncedId] = useState<string | undefined>(undefined)
+if (post && post._id !== syncedId) {
+  setSyncedId(post._id)
+  form.reset({ ...mappedValues })
+}
+```
+
+### react-map-gl (Mapbox)
+
+Utiliser le mode **non-contrôlé** avec `initialViewState` et une `key` pour forcer le remontage :
+
+```typescript
+// ❌ Mode contrôlé (cause des boucles infinies)
+<Map {...viewState} onMove={handleMove} />
+
+// ✅ Mode non-contrôlé avec key
+<Map
+  key={`${longitude}-${latitude}`}
+  initialViewState={{ latitude, longitude, zoom: 14 }}
+/>
+```
+
+### shadcn/ui Select avec react-hook-form
+
+Les Select fonctionnent en mode contrôlé :
+
+```typescript
+<Select onValueChange={field.onChange} value={field.value}>
+  <SelectTrigger>
+    <SelectValue placeholder="Sélectionner" />
+  </SelectTrigger>
+  <SelectContent>
+    {options.map((opt) => (
+      <SelectItem key={opt.value} value={opt.value}>
+        {opt.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+```
+
 ## Gotchas
 
 - Clerk synchronise les users vers Convex via webhook (`convex/http.ts`)
 - Les enums sont dans `convex/schema.ts` (postStatus, paymentMethod, etc.)
 - Utiliser `<Image>` de Next.js, pas `<img>` natif
 - Variables underscore `_foo` pour les variables intentionnellement non utilisées
+- Mapbox : `AddressAutofill` pour l'autocomplétion, `LocationMap` pour l'affichage

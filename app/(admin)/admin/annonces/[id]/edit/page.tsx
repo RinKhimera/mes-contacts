@@ -109,6 +109,7 @@ export default function EditAnnoncePage() {
         <CardContent>
           <PostForm
             post={post}
+            postId={id}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
           />

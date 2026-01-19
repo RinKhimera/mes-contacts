@@ -91,6 +91,8 @@ export const categoriesServices = [
   "Courtier Immobilier",
   "Assurance",
   "Association Communautaire",
+  "Tutorat",
+  "Psychothérapie",
 ]
 
 export const data = {

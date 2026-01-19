@@ -103,6 +103,7 @@ export default function EditOrganizationPage() {
         <CardContent>
           <OrganizationForm
             organization={organization}
+            organizationId={id}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
           />

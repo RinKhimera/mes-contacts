@@ -10,7 +10,7 @@ const isProtectedRoute = createRouteMatcher([
 
 const isPublicRoute = createRouteMatcher(["/"])
 
-export default clerkMiddleware(async (auth, req) => {
+export const proxy = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth()
 
   // Si l'utilisateur est connecté et tente d'accéder aux pages vitrine
