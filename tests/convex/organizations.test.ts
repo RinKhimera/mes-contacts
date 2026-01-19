@@ -146,11 +146,31 @@ describe("organizations.searchByName", () => {
       await createTestOrganization(ctx, userId, { name: "Org 2" })
     })
 
+    // Empty search returns empty array (requires min 2 chars for performance)
     const results = await t.query(api.organizations.searchByName, {
       name: "",
     })
 
-    expect(results).toHaveLength(2)
+    expect(results).toHaveLength(0)
+  })
+
+  it("returns empty when name is too short", async () => {
+    const t = convexTest(schema, modules)
+
+    const userId = await t.run(async (ctx) => {
+      return await createTestUser(ctx)
+    })
+
+    await t.run(async (ctx) => {
+      await createTestOrganization(ctx, userId, { name: "Org 1" })
+    })
+
+    // Single character search returns empty (requires min 2 chars)
+    const results = await t.query(api.organizations.searchByName, {
+      name: "O",
+    })
+
+    expect(results).toHaveLength(0)
   })
 })
 

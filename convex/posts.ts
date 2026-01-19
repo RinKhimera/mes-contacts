@@ -20,6 +20,7 @@ export const getById = query({
 
 /**
  * Récupère un post avec ses médias et infos propriétaire
+ * Optimisé: requêtes parallélisées avec Promise.all
  */
 export const getByIdWithDetails = query({
   args: { id: v.id("posts") },
@@ -27,22 +28,19 @@ export const getByIdWithDetails = query({
     const post = await ctx.db.get(id)
     if (!post) return null
 
-    // Récupérer les médias
-    const media = await ctx.db
-      .query("media")
-      .withIndex("by_postId_order", (q) => q.eq("postId", id))
-      .collect()
-
-    // Récupérer le propriétaire (user ou organization)
-    let owner = null
-    if (post.userId) {
-      owner = await ctx.db.get(post.userId)
-    } else if (post.organizationId) {
-      owner = await ctx.db.get(post.organizationId)
-    }
-
-    // Récupérer l'admin qui a créé le post
-    const createdByUser = await ctx.db.get(post.createdBy)
+    // Paralléliser les requêtes
+    const [media, owner, createdByUser] = await Promise.all([
+      ctx.db
+        .query("media")
+        .withIndex("by_postId_order", (q) => q.eq("postId", id))
+        .collect(),
+      post.userId
+        ? ctx.db.get(post.userId)
+        : post.organizationId
+          ? ctx.db.get(post.organizationId)
+          : Promise.resolve(null),
+      ctx.db.get(post.createdBy),
+    ])
 
     return {
       ...post,
@@ -56,6 +54,7 @@ export const getByIdWithDetails = query({
 
 /**
  * Liste tous les posts (Admin)
+ * Optimisé: utilise .take() au lieu de .collect() + .slice()
  */
 export const list = query({
   args: {
@@ -63,43 +62,34 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { status, limit }) => {
-    let posts
+    const effectiveLimit = limit ?? 100 // Default limit
 
     if (status) {
-      posts = await ctx.db
+      return await ctx.db
         .query("posts")
         .withIndex("by_status", (q) => q.eq("status", status))
         .order("desc")
-        .collect()
-    } else {
-      posts = await ctx.db.query("posts").order("desc").collect()
+        .take(effectiveLimit)
     }
 
-    if (limit) {
-      return posts.slice(0, limit)
-    }
-
-    return posts
+    return await ctx.db.query("posts").order("desc").take(effectiveLimit)
   },
 })
 
 /**
  * Liste les posts publiés (public)
+ * Optimisé: utilise .take() au lieu de .collect() + .slice()
  */
 export const getPublished = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
-    const posts = await ctx.db
+    const effectiveLimit = limit ?? 100 // Default limit
+
+    return await ctx.db
       .query("posts")
       .withIndex("by_status", (q) => q.eq("status", "PUBLISHED"))
       .order("desc")
-      .collect()
-
-    if (limit) {
-      return posts.slice(0, limit)
-    }
-
-    return posts
+      .take(effectiveLimit)
   },
 })
 
@@ -225,6 +215,7 @@ export const search = query({
 
 /**
  * Recherche admin (tous statuts)
+ * Optimisé: utilise les index quand possible et limite les résultats
  */
 export const searchAdmin = query({
   args: {
@@ -233,13 +224,23 @@ export const searchAdmin = query({
     province: v.optional(v.string()),
     city: v.optional(v.string()),
     status: v.optional(postStatus),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let posts = await ctx.db.query("posts").order("desc").collect()
+    const maxLimit = args.limit ?? 100
+    // Take extra to account for in-memory filtering
+    const fetchLimit = maxLimit * 3
+    let posts
 
-    // Filtrer par statut
+    // Use index when status is provided (most selective filter)
     if (args.status) {
-      posts = posts.filter((p) => p.status === args.status)
+      posts = await ctx.db
+        .query("posts")
+        .withIndex("by_status", (q) => q.eq("status", args.status!))
+        .order("desc")
+        .take(fetchLimit)
+    } else {
+      posts = await ctx.db.query("posts").order("desc").take(fetchLimit)
     }
 
     // Filtrer par catégorie
@@ -272,12 +273,13 @@ export const searchAdmin = query({
       )
     }
 
-    return posts
+    return posts.slice(0, maxLimit)
   },
 })
 
 /**
  * Récupère les posts de l'utilisateur courant (ses posts ou ceux de ses orgs)
+ * Optimisé: utilise Promise.all pour éviter le pattern N+1
  */
 export const getMyPosts = query({
   args: {},
@@ -285,29 +287,30 @@ export const getMyPosts = query({
     const user = await getCurrentUser(ctx)
     if (!user) return []
 
-    // Récupérer les posts où l'utilisateur est propriétaire direct
-    const userPosts = await ctx.db
-      .query("posts")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
-      .collect()
-
-    // Récupérer les organisations de l'utilisateur
-    const memberships = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
-      .collect()
-
-    // Récupérer les posts de chaque organisation
-    const orgPosts = []
-    for (const membership of memberships) {
-      const posts = await ctx.db
+    // Paralléliser: posts utilisateur + memberships
+    const [userPosts, memberships] = await Promise.all([
+      ctx.db
         .query("posts")
-        .withIndex("by_organizationId", (q) =>
-          q.eq("organizationId", membership.organizationId)
-        )
-        .collect()
-      orgPosts.push(...posts)
-    }
+        .withIndex("by_userId", (q) => q.eq("userId", user._id))
+        .collect(),
+      ctx.db
+        .query("organizationMembers")
+        .withIndex("by_userId", (q) => q.eq("userId", user._id))
+        .collect(),
+    ])
+
+    // Récupérer les posts de toutes les organisations en parallèle
+    const orgPostsArrays = await Promise.all(
+      memberships.map((membership) =>
+        ctx.db
+          .query("posts")
+          .withIndex("by_organizationId", (q) =>
+            q.eq("organizationId", membership.organizationId)
+          )
+          .collect()
+      )
+    )
+    const orgPosts = orgPostsArrays.flat()
 
     // Combiner et trier par date
     const allPosts = [...userPosts, ...orgPosts]

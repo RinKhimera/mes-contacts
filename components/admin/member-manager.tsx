@@ -38,7 +38,7 @@ export function MemberManager({ organizationId }: MemberManagerProps) {
   const members = useQuery(api.organizationMembers.getByOrganization, {
     organizationId,
   })
-  const allUsers = useQuery(api.users.list)
+  const allUsers = useQuery(api.users.list, {})
   const addMember = useMutation(api.organizationMembers.addMember)
   const updateRole = useMutation(api.organizationMembers.updateRole)
   const removeMember = useMutation(api.organizationMembers.removeMember)

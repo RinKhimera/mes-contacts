@@ -74,7 +74,7 @@ export function OrganizationForm({
   onSubmit,
   isSubmitting,
 }: OrganizationFormProps) {
-  const users = useQuery(api.users.list)
+  const users = useQuery(api.users.list, {})
 
   const form = useForm<OrganizationFormValues>({
     resolver: zodResolver(organizationSchema),

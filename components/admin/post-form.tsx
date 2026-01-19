@@ -71,8 +71,8 @@ interface PostFormProps {
 }
 
 export function PostForm({ post, postId, onSubmit, isSubmitting }: PostFormProps) {
-  const users = useQuery(api.users.list)
-  const organizations = useQuery(api.organizations.list)
+  const users = useQuery(api.users.list, {})
+  const organizations = useQuery(api.organizations.list, {})
   const existingMedia = useQuery(
     api.media.getByPost,
     postId ? { postId } : "skip"

@@ -91,27 +91,44 @@ export const getCurrentUser = query({
 
 /**
  * Liste tous les utilisateurs (admin)
+ * Optimisé: ajout d'une limite par défaut
  */
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("users").order("desc").collect()
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { limit }) => {
+    const effectiveLimit = limit ?? 100 // Default limit
+    return await ctx.db.query("users").order("desc").take(effectiveLimit)
   },
 })
 
 /**
  * Recherche utilisateurs par nom ou email
+ * Optimisé: limite les résultats et requiert minimum 2 caractères
  */
 export const search = query({
-  args: { query: v.string() },
-  handler: async (ctx, { query }) => {
-    const allUsers = await ctx.db.query("users").collect()
+  args: {
+    query: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { query, limit }) => {
+    const effectiveLimit = limit ?? 20
+
+    // Require minimum 2 characters for search
+    if (query.length < 2) return []
+
+    // Cap the number of users to scan
+    const users = await ctx.db.query("users").take(500)
     const searchLower = query.toLowerCase()
-    return allUsers.filter(
-      (user) =>
-        user.name.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower)
-    )
+
+    return users
+      .filter(
+        (user) =>
+          user.name.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower)
+      )
+      .slice(0, effectiveLimit)
   },
 })
 

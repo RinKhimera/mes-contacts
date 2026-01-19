@@ -18,11 +18,15 @@ export const getById = query({
 
 /**
  * Liste toutes les organisations (admin)
+ * Optimisé: ajout d'une limite par défaut
  */
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("organizations").order("desc").collect()
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { limit }) => {
+    const effectiveLimit = limit ?? 100 // Default limit
+    return await ctx.db.query("organizations").order("desc").take(effectiveLimit)
   },
 })
 
@@ -41,15 +45,25 @@ export const getByOwnerId = query({
 
 /**
  * Recherche organisations par nom
+ * Optimisé: limite les résultats et requiert minimum 2 caractères
  */
 export const searchByName = query({
-  args: { name: v.string() },
-  handler: async (ctx, { name }) => {
-    const allOrgs = await ctx.db.query("organizations").collect()
+  args: {
+    name: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { name, limit }) => {
+    const effectiveLimit = limit ?? 20
+
+    // Require minimum 2 characters for search
+    if (name.length < 2) return []
+
+    // Cap the number of orgs to scan
+    const orgs = await ctx.db.query("organizations").take(500)
     const searchLower = name.toLowerCase()
-    return allOrgs.filter((org) =>
-      org.name.toLowerCase().includes(searchLower)
-    )
+    return orgs
+      .filter((org) => org.name.toLowerCase().includes(searchLower))
+      .slice(0, effectiveLimit)
   },
 })
 

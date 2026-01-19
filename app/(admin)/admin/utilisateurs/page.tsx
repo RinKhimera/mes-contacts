@@ -17,7 +17,7 @@ import {
 import { getInitials } from "@/lib/utils"
 
 export default function UtilisateursPage() {
-  const users = useQuery(api.users.list)
+  const users = useQuery(api.users.list, {})
 
   const columns: ColumnDef<Doc<"users">>[] = [
     {

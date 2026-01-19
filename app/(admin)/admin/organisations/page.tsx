@@ -24,7 +24,7 @@ import { getInitials } from "@/lib/utils"
 import { provinces } from "@/constants"
 
 export default function OrganisationsPage() {
-  const organizations = useQuery(api.organizations.list)
+  const organizations = useQuery(api.organizations.list, {})
   const removeOrg = useMutation(api.organizations.remove)
 
   const [deleteId, setDeleteId] = useState<Id<"organizations"> | null>(null)

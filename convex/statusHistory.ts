@@ -158,6 +158,7 @@ export const getLatestForPost = query({
 
 /**
  * Compte les changements de statut par période
+ * Optimisé: utilise des requêtes indexées par statut en parallèle
  */
 export const getStatsByPeriod = query({
   args: {
@@ -165,28 +166,42 @@ export const getStatsByPeriod = query({
     endDate: v.number(),
   },
   handler: async (ctx, { startDate, endDate }) => {
-    const allHistory = await ctx.db.query("statusHistory").order("desc").collect()
+    // Query by each status using index (more efficient than full scan)
+    const statuses = ["DRAFT", "PUBLISHED", "EXPIRED", "DISABLED"] as const
 
-    const filtered = allHistory.filter((entry) => {
-      const createdAt = entry._creationTime
-      return createdAt >= startDate && createdAt <= endDate
-    })
+    const entriesByStatus = await Promise.all(
+      statuses.map((status) =>
+        ctx.db
+          .query("statusHistory")
+          .withIndex("by_newStatus", (q) => q.eq("newStatus", status))
+          .collect()
+      )
+    )
 
     const stats = {
-      total: filtered.length,
+      total: 0,
       byStatus: {} as Record<string, number>,
       byAdmin: {} as Record<string, number>,
     }
 
-    for (const entry of filtered) {
-      // Par statut
-      stats.byStatus[entry.newStatus] =
-        (stats.byStatus[entry.newStatus] || 0) + 1
+    // Process each status's entries
+    statuses.forEach((status, i) => {
+      const entries = entriesByStatus[i]
 
-      // Par admin
-      const adminId = entry.changedBy
-      stats.byAdmin[adminId] = (stats.byAdmin[adminId] || 0) + 1
-    }
+      // Filter by date range
+      const filtered = entries.filter(
+        (e) => e._creationTime >= startDate && e._creationTime <= endDate
+      )
+
+      stats.byStatus[status] = filtered.length
+      stats.total += filtered.length
+
+      // Count by admin
+      for (const entry of filtered) {
+        const adminId = entry.changedBy
+        stats.byAdmin[adminId] = (stats.byAdmin[adminId] || 0) + 1
+      }
+    })
 
     return stats
   },

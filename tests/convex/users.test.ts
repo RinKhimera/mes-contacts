@@ -118,9 +118,23 @@ describe("users.search", () => {
       await createTestUser(ctx, { name: "User 2" })
     })
 
+    // Empty search returns empty array (requires min 2 chars for performance)
     const results = await t.query(api.users.search, { query: "" })
 
-    expect(results).toHaveLength(2)
+    expect(results).toHaveLength(0)
+  })
+
+  it("returns empty when query is too short", async () => {
+    const t = convexTest(schema, modules)
+
+    await t.run(async (ctx) => {
+      await createTestUser(ctx, { name: "User 1" })
+    })
+
+    // Single character search returns empty (requires min 2 chars)
+    const results = await t.query(api.users.search, { query: "U" })
+
+    expect(results).toHaveLength(0)
   })
 })
 

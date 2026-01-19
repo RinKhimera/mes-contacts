@@ -21,7 +21,7 @@ import { toDollars } from "@/convex/lib/validation"
 import { PostsStatusChart, PaymentMethodChart } from "@/components/admin/stats-charts"
 
 export default function AdminDashboardPage() {
-  const organizations = useQuery(api.organizations.list)
+  const organizations = useQuery(api.organizations.list, {})
   const posts = useQuery(api.posts.list, { limit: 1000 })
   const paymentStats = useQuery(api.payments.getStats)
   const recentActivity = useQuery(api.statusHistory.getRecent, { limit: 10 })

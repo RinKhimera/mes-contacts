@@ -34,6 +34,7 @@ export const getByPost = query({
 
 /**
  * Liste tous les paiements (Admin)
+ * Optimisé: utilise .take() au lieu de .collect() + .slice()
  */
 export const list = query({
   args: {
@@ -42,37 +43,35 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { status, method, limit }) => {
-    let results
+    const effectiveLimit = limit ?? 100 // Default limit
 
     if (status && method) {
-      results = await ctx.db
+      return await ctx.db
         .query("payments")
         .withIndex("by_status_method", (q) =>
           q.eq("status", status).eq("method", method)
         )
         .order("desc")
-        .collect()
-    } else if (status) {
-      results = await ctx.db
+        .take(effectiveLimit)
+    }
+
+    if (status) {
+      return await ctx.db
         .query("payments")
         .withIndex("by_status", (q) => q.eq("status", status))
         .order("desc")
-        .collect()
-    } else if (method) {
-      results = await ctx.db
+        .take(effectiveLimit)
+    }
+
+    if (method) {
+      return await ctx.db
         .query("payments")
         .withIndex("by_method", (q) => q.eq("method", method))
         .order("desc")
-        .collect()
-    } else {
-      results = await ctx.db.query("payments").order("desc").collect()
+        .take(effectiveLimit)
     }
 
-    if (limit) {
-      return results.slice(0, limit)
-    }
-
-    return results
+    return await ctx.db.query("payments").order("desc").take(effectiveLimit)
   },
 })
 
@@ -124,15 +123,26 @@ export const getByDateRange = query({
 
 /**
  * Calcule les statistiques de paiement
+ * Optimisé: utilise des requêtes indexées par statut en parallèle
  */
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    const allPayments = await ctx.db.query("payments").collect()
-
-    const completed = allPayments.filter((p) => p.status === "COMPLETED")
-    const pending = allPayments.filter((p) => p.status === "PENDING")
-    const refunded = allPayments.filter((p) => p.status === "REFUNDED")
+    // Query each status separately using indexes (parallel)
+    const [completed, pending, refunded] = await Promise.all([
+      ctx.db
+        .query("payments")
+        .withIndex("by_status", (q) => q.eq("status", "COMPLETED"))
+        .collect(),
+      ctx.db
+        .query("payments")
+        .withIndex("by_status", (q) => q.eq("status", "PENDING"))
+        .collect(),
+      ctx.db
+        .query("payments")
+        .withIndex("by_status", (q) => q.eq("status", "REFUNDED"))
+        .collect(),
+    ])
 
     const totalRevenue = completed.reduce((sum, p) => sum + p.amount, 0)
     const pendingAmount = pending.reduce((sum, p) => sum + p.amount, 0)
@@ -144,7 +154,7 @@ export const getStats = query({
     }
 
     return {
-      totalCount: allPayments.length,
+      totalCount: completed.length + pending.length + refunded.length,
       completedCount: completed.length,
       pendingCount: pending.length,
       refundedCount: refunded.length,
