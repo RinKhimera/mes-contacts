@@ -1,9 +1,6 @@
 export const menuItems = [
-  // { href: "/", label: "mc.ca" },
-  // { href: "/my-contacts", label: "Ma liste de contacts" },
   { href: "/recherche", label: "Rechercher" },
   { href: "/login", label: "Connexion" },
-  // { href: "/about", label: "A Propos" },
 ]
 
 export const navItems = [
@@ -146,14 +143,6 @@ export const data = {
           title: "Sécurité",
           url: "/account/security",
         },
-        // {
-        //   title: "Billing",
-        //   url: "#",
-        // },
-        // {
-        //   title: "Limits",
-        //   url: "#",
-        // },
       ],
     },
   ],

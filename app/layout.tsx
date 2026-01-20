@@ -1,12 +1,9 @@
-import { ourFileRouter } from "@/app/api/uploadthing/core"
 import "@/app/globals.css"
 import { ThemeProvider } from "@/components/shared/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import ConvexClientProvider from "@/providers/convex-client-provider"
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin"
 import type { Metadata } from "next"
 import { DM_Sans, Fraunces } from "next/font/google"
-import { extractRouterConfig } from "uploadthing/server"
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -41,10 +38,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ConvexClientProvider>
-            <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-            {children}
-          </ConvexClientProvider>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
         </ThemeProvider>
         <Toaster richColors />
       </body>
